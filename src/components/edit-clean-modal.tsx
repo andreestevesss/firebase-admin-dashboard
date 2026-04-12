@@ -55,7 +55,7 @@ export function EditCleanModal({
     userId: '',
     userFullName: '',
     picture: '',
-    status: '',
+    status: 'pending',
     rotation: 0
   });
   const [isSaving, setIsSaving] = useState(false);
@@ -78,7 +78,7 @@ export function EditCleanModal({
         userId: clean.userId || '',
         userFullName: clean.userFullName || '',
         picture: clean.picture || '',
-        status: clean.status || 'completed',
+        status: clean.status || 'pending',
         rotation: clean.rotation || 0
       };
 
