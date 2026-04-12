@@ -1,4 +1,5 @@
 'use client';
+// Build version: 1.0.1 - Force fresh deployment
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
