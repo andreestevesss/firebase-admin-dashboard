@@ -59,7 +59,7 @@ export interface SalesPrep {
   userFullName: string;
   timestamp: Date;
   picture: string;
-  status: string;
+  status: 'completed' | 'in-progress' | 'pending';
   rotation?: number;
 }
 
