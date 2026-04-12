@@ -417,10 +417,10 @@ export default function DashboardPage() {
                         />
                         <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dashed" />} />
                         <Bar dataKey="dailyCleans" fill="var(--color-dailyCleans)" shape={<CustomHatchedBar isHatched={false} />} radius={4}>
-                          <LabelList dataKey="dailyCleans" position="top" fill="currentColor" className="fill-foreground font-semibold text-[10px]" formatter={(value: number) => value > 0 ? value : ''} />
+                          <LabelList dataKey="dailyCleans" position="top" fill="currentColor" className="fill-foreground font-semibold text-[10px]" formatter={(value: any) => value > 0 ? value : ''} />
                         </Bar>
                         <Bar dataKey="salesPrep" fill="var(--color-salesPrep)" shape={<CustomHatchedBar />} radius={4}>
-                          <LabelList dataKey="salesPrep" position="top" fill="currentColor" className="fill-foreground font-semibold text-[10px]" formatter={(value: number) => value > 0 ? value : ''} />
+                          <LabelList dataKey="salesPrep" position="top" fill="currentColor" className="fill-foreground font-semibold text-[10px]" formatter={(value: any) => value > 0 ? value : ''} />
                         </Bar>
                       </BarChart>
                     </ChartContainer>
@@ -477,7 +477,7 @@ export default function DashboardPage() {
                              if (user) router.push(`/dashboard/daily-cleans?user=${encodeURIComponent(user)}`);
                            }}
                         >
-                          <LabelList dataKey="dailyCleans" position="top" fill="currentColor" className="fill-foreground font-semibold text-[10px]" formatter={(value: number) => value > 0 ? value : ''} />
+                          <LabelList dataKey="dailyCleans" position="top" fill="currentColor" className="fill-foreground font-semibold text-[10px]" formatter={(value: any) => value > 0 ? value : ''} />
                         </Bar>
                         <Bar 
                            dataKey="salesPrep" 
@@ -490,7 +490,7 @@ export default function DashboardPage() {
                              if (user) router.push(`/dashboard/sales-prep?user=${encodeURIComponent(user)}`);
                            }}
                         >
-                          <LabelList dataKey="salesPrep" position="top" fill="currentColor" className="fill-foreground font-semibold text-[10px]" formatter={(value: number) => value > 0 ? value : ''} />
+                          <LabelList dataKey="salesPrep" position="top" fill="currentColor" className="fill-foreground font-semibold text-[10px]" formatter={(value: any) => value > 0 ? value : ''} />
                         </Bar>
                       </BarChart>
                     </ChartContainer>
