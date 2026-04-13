@@ -81,7 +81,7 @@ export default function SlidingPagination({
           <Button
             key={pageNum}
             variant="ghost"
-            ref={(el) => (buttonRefs.current[pageNum - 1] = el)}
+            ref={(el) => { buttonRefs.current[pageNum - 1] = el }}
             onClick={() => onPageChange(pageNum)}
             className={cn(
               "relative px-4 py-2 text-sm",
