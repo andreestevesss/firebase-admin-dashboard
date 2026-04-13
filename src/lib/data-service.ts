@@ -608,7 +608,12 @@ export class DataService {
       return branches;
     } catch (error) {
       console.error('Error getting branches:', error);
-      return ['Main Branch', 'Branch A', 'Branch B', 'Branch C'];
+      return [
+        { id: 'main', name: 'Main Branch', location: 'London', manager: 'Admin', phone: '', email: '' },
+        { id: 'a', name: 'Branch A', location: 'Birmingham', manager: 'Manager A', phone: '', email: '' },
+        { id: 'b', name: 'Branch B', location: 'Manchester', manager: 'Manager B', phone: '', email: '' },
+        { id: 'c', name: 'Branch C', location: 'Leeds', manager: 'Manager C', phone: '', email: '' }
+      ];
     }
   }
 
