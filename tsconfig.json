@@ -28,9 +28,6 @@
       ]
     }
   },
-  "devDependencies": {
-    "@types/firebase": "^9.0.0"
-  },
   "include": [
     "next-env.d.ts",
     ".next/types/**/*.ts",
