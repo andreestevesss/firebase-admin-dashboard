@@ -233,12 +233,13 @@ export class DataService {
       const page = filters?.page || 1;
       const limitCount = filters?.limit || 15;
       
-      // Load current page
-      // In practice, true server-side pagination with sorting and filtering 
-      // often needs startAfter, but for this volume and a 2-month limit, 
-      // we can fetch up to the required page size.
-      const paginatedQuery = query(baseQuery, limit(limitCount * page));
-      const snapshot = await getDocs(paginatedQuery);
+      // When in-memory filters are active (branch/user), fetch ALL docs for the date
+      // range first — otherwise limit(N) cuts off records before the filter can see them.
+      const hasInMemoryFilter = (filters?.branch && filters.branch !== 'all') || !!filters?.user;
+      const fetchQuery = hasInMemoryFilter
+        ? baseQuery                               // no limit — fetch all, filter in memory
+        : query(baseQuery, limit(limitCount * page)); // server-side pagination only
+      const snapshot = await getDocs(fetchQuery);
       
       const allResults: CheckIn[] = [];
       snapshot.forEach((doc) => {
@@ -276,14 +277,15 @@ export class DataService {
         );
       }
 
+      const filteredTotal = hasInMemoryFilter ? filteredResults.length : total;
       const startIndex = (page - 1) * limitCount;
       const pageData = filteredResults.slice(startIndex, startIndex + limitCount);
 
       return {
         data: pageData,
-        total: filters?.user ? filteredResults.length : total,
+        total: filteredTotal,
         page,
-        totalPages: Math.ceil((filters?.user ? filteredResults.length : total) / limitCount)
+        totalPages: Math.ceil(filteredTotal / limitCount)
       };
     } catch (error) {
       console.error('Error loading daily cleans:', error);
