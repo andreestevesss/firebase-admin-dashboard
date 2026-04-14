@@ -792,21 +792,24 @@ export class DataService {
   static async getExportData(type: 'daily-cleans' | 'sales-prep', branch?: string, startDate?: Date, endDate?: Date): Promise<any[]> {
     try {
       const collectionName = type === 'daily-cleans' ? 'ScannedCheckIN' : 'SalesPrep';
-      const snapshot = await getDocs(collection(db, collectionName));
-      
+      const colRef = collection(db, collectionName);
+
+      // Build Firestore query with date constraints so we don't fetch the whole collection
+      const qConstraints: any[] = [orderBy('timestamp', 'desc')];
+      if (startDate) qConstraints.push(where('timestamp', '>=', startDate));
+      if (endDate)   qConstraints.push(where('timestamp', '<=', endDate));
+
+      const snapshot = await getDocs(query(colRef, ...qConstraints));
+
       if (snapshot.empty) return [];
 
       const results: any[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
         const timestamp = data.timestamp ? data.timestamp.toDate() : (data.date ? data.date.toDate() : new Date());
-        
-        // Filter by branch
+
+        // Branch filter in-memory (avoids name mismatch between Branches collection and actual data)
         if (branch && branch !== 'all' && data.branch !== branch) return;
-        
-        // Filter by date range
-        if (startDate && timestamp < startDate) return;
-        if (endDate && timestamp > endDate) return;
 
         results.push({
           id: doc.id,
@@ -825,8 +828,8 @@ export class DataService {
         });
       });
 
-      // Sort by date (newest first)
-      results.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      // Sort by date ascending (for multi-tab Excel grouping)
+      results.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
       
       return results;
     } catch (error) {
