@@ -15,6 +15,7 @@ export default function ExportPage() {
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [branches, setBranches] = useState<Branch[]>([]);
+  const [allBranchNames, setAllBranchNames] = useState<string[]>([]);
   
   // Filters
   const [fileType, setFileType] = useState<'daily-cleans' | 'sales-prep'>('daily-cleans');
@@ -25,6 +26,7 @@ export default function ExportPage() {
 
   useEffect(() => {
     loadBranches();
+    loadAllBranchNames();
   }, []);
 
   const loadBranches = async () => {
@@ -36,6 +38,27 @@ export default function ExportPage() {
       console.error('Error loading branches:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Load real branch names directly from both collections to avoid the
+  // Branches collection key mismatch (e.g. "1" vs "Dayton")
+  const loadAllBranchNames = async () => {
+    try {
+      const { collection, getDocs } = await import('firebase/firestore');
+      const { db } = await import('@/lib/firebase');
+      const branchSet = new Set<string>();
+      // Check both collections so all branches appear regardless of selected export type
+      for (const col of ['ScannedCheckIN', 'SalesPrep']) {
+        const snapshot = await getDocs(collection(db, col));
+        snapshot.forEach((doc) => {
+          const b = doc.data().branch;
+          if (b && b !== 'N/A') branchSet.add(b);
+        });
+      }
+      setAllBranchNames(Array.from(branchSet).sort());
+    } catch (error) {
+      console.error('Error loading branch names:', error);
     }
   };
 
@@ -181,11 +204,17 @@ export default function ExportPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Branches</SelectItem>
-                      {branches.filter(b => b.status !== 'inactive').map((b) => (
-                        <SelectItem key={b.id} value={b.name}>
-                          {b.name} - {b.location}
-                        </SelectItem>
-                      ))}
+                      {allBranchNames.length > 0 ? (
+                        allBranchNames.map((name) => (
+                          <SelectItem key={name} value={name}>{name}</SelectItem>
+                        ))
+                      ) : (
+                        branches.filter(b => b.status !== 'inactive').map((b) => (
+                          <SelectItem key={b.id} value={b.name}>
+                            {b.name} - {b.location}
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
