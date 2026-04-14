@@ -221,10 +221,8 @@ export class DataService {
         qConstraints.push(where('timestamp', '>=', lookbackLimit));
       }
 
-      // Branch filter
-      if (filters?.branch && filters.branch !== 'all') {
-        qConstraints.push(where('branch', '==', filters.branch));
-      }
+      // Branch filter is applied in-memory below to avoid name mismatch
+      // between the Branches collection keys and actual ScannedCheckIN branch values
 
       // Build and count
       const baseQuery = query(cleansRef, ...qConstraints);
@@ -264,8 +262,14 @@ export class DataService {
         });
       });
 
-      // User filter still needs memory slice if we don't have indexes for it
+      // Apply in-memory filters (branch & user) to avoid Firestore index requirements
+      // and branch name mismatches between collections
       let filteredResults = allResults;
+      if (filters?.branch && filters.branch !== 'all') {
+        filteredResults = filteredResults.filter(clean =>
+          clean.branch === filters.branch
+        );
+      }
       if (filters?.user) {
         filteredResults = filteredResults.filter(clean => 
           clean.userFullName.toLowerCase().includes(filters.user!.toLowerCase())

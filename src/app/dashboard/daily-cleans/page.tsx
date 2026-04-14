@@ -207,11 +207,9 @@ function DailyCleansContent() {
                 </SelectTrigger>
                 <SelectContent className="bg-white dark:bg-[#262626] border border-gray-200 dark:border-[#262626]">
                   <SelectItem value="all" className="text-gray-700 dark:text-[#a1a1a1] text-xs">All</SelectItem>
-                  {branches.length > 0 ? (
-                    branches.filter(b => b.status !== 'inactive').map((b) => (
-                      <SelectItem key={b.name} value={b.name} className="text-gray-700 dark:text-[#a1a1a1] text-xs">
-                        {b.name} - {b.location}
-                      </SelectItem>
+                  {allBranchNames.length > 0 ? (
+                    allBranchNames.map((name) => (
+                      <SelectItem key={name} value={name} className="text-gray-700 dark:text-[#a1a1a1] text-xs">{name}</SelectItem>
                     ))
                   ) : (
                     getBranchNames().map((name) => (
