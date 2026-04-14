@@ -33,6 +33,7 @@ function SalesPrepContent() {
   // Data states
   const [sales, setSales] = useState<SalesPrep[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
+  const [allBranchNames, setAllBranchNames] = useState<string[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState({
     sales: false,
@@ -139,7 +140,27 @@ function SalesPrepContent() {
   useEffect(() => {
     loadBranches();
     loadUsers();
+    loadAllBranches();
   }, []);
+
+  // Load all branches directly from SalesPrep collection (real branch names)
+  const loadAllBranches = async () => {
+    try {
+      const { collection, getDocs } = await import('firebase/firestore');
+      const { db } = await import('@/lib/firebase');
+      const snapshot = await getDocs(collection(db, 'SalesPrep'));
+      const branchSet = new Set<string>();
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.branch && data.branch !== 'N/A') {
+          branchSet.add(data.branch);
+        }
+      });
+      setAllBranchNames(Array.from(branchSet).sort());
+    } catch (error) {
+      console.error('Error loading all branches:', error);
+    }
+  };
 
   // Get branch names for dropdown
   const getBranchNames = (): string[] => {
@@ -177,11 +198,17 @@ function SalesPrepContent() {
                   </SelectTrigger>
                   <SelectContent className="bg-white dark:bg-[#262626] border border-gray-200 dark:border-[#262626]">
                     <SelectItem value="all" className="text-gray-700 dark:text-[#a1a1a1] text-xs">All</SelectItem>
-                    {branches.filter(b => b.status !== 'inactive').map((b) => (
-                      <SelectItem key={b.name} value={b.name} className="text-gray-700 dark:text-[#a1a1a1] text-xs">
-                        {b.name} - {b.location}
-                      </SelectItem>
-                    ))}
+                    {allBranchNames.length > 0 ? (
+                      allBranchNames.map((name) => (
+                        <SelectItem key={name} value={name} className="text-gray-700 dark:text-[#a1a1a1] text-xs">{name}</SelectItem>
+                      ))
+                    ) : (
+                      branches.filter(b => b.status !== 'inactive').map((b) => (
+                        <SelectItem key={b.name} value={b.name} className="text-gray-700 dark:text-[#a1a1a1] text-xs">
+                          {b.name} - {b.location}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               )}

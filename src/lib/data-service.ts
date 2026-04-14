@@ -364,21 +364,21 @@ export class DataService {
         qConstraints.push(where('timestamp', '>=', lookbackLimit));
       }
 
-      // Branch filter
-      if (filters?.branch && filters.branch !== 'all') {
-        qConstraints.push(where('branch', '==', filters.branch));
-      }
+      // Branch filter applied in-memory below (same pattern as getDailyCleans)
+      // to avoid name mismatches between Branches collection and SalesPrep documents
 
       // Build and count
       const baseQuery = query(salesRef, ...qConstraints);
       const countSnapshot = await getCountFromServer(baseQuery);
       const total = countSnapshot.data().count;
 
-      // Pagination
-      const page = filters?.page || 1;
-      const limitCount = filters?.limit || 10;
-      const paginatedQuery = query(baseQuery, limit(limitCount * page));
-      const snapshot = await getDocs(paginatedQuery);
+      // When in-memory filters are active (branch/user), fetch ALL docs for the date
+      // range first — otherwise limit(N) cuts off records before the filter can see them.
+      const hasInMemoryFilter = (filters?.branch && filters.branch !== 'all') || !!filters?.user;
+      const fetchQuery = hasInMemoryFilter
+        ? baseQuery                                    // no limit — fetch all, filter in memory
+        : query(baseQuery, limit(limitCount * page));  // server-side pagination only
+      const snapshot = await getDocs(fetchQuery);
       
       const allSales: SalesPrep[] = [];
       snapshot.forEach((doc) => {
@@ -402,22 +402,28 @@ export class DataService {
         });
       });
 
-      // User filter still needs memory slice if we don't have indexes for it
+      // Apply in-memory filters (branch & user) — done after full fetch so no records are missed
       let filteredResults = allSales;
+      if (filters?.branch && filters.branch !== 'all') {
+        filteredResults = filteredResults.filter(sale =>
+          sale.branch === filters.branch
+        );
+      }
       if (filters?.user) {
         filteredResults = filteredResults.filter(sale => 
           sale.userFullName.toLowerCase().includes(filters.user!.toLowerCase())
         );
       }
 
+      const filteredTotal = hasInMemoryFilter ? filteredResults.length : total;
       const startIndex = (page - 1) * limitCount;
       const pageData = filteredResults.slice(startIndex, startIndex + limitCount);
 
       return {
         data: pageData,
-        total: filters?.user ? filteredResults.length : total,
+        total: filteredTotal,
         page,
-        totalPages: Math.ceil((filters?.user ? filteredResults.length : total) / limitCount)
+        totalPages: Math.ceil(filteredTotal / limitCount)
       };
     } catch (error) {
       console.error('Error loading sales prep:', error);
