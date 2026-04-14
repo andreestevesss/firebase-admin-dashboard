@@ -372,6 +372,10 @@ export class DataService {
       const countSnapshot = await getCountFromServer(baseQuery);
       const total = countSnapshot.data().count;
 
+      // Pagination settings — must be declared before fetchQuery uses limitCount
+      const page = filters?.page || 1;
+      const limitCount = filters?.limit || 10;
+
       // When in-memory filters are active (branch/user), fetch ALL docs for the date
       // range first — otherwise limit(N) cuts off records before the filter can see them.
       const hasInMemoryFilter = (filters?.branch && filters.branch !== 'all') || !!filters?.user;
