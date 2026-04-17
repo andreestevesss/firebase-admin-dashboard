@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/animated-table-rows';
 import { Badge } from '@/components/ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
-import { DataService, Job, Branch } from '@/lib/data-service';
+import { DataService, Job } from '@/lib/data-service';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import SlidingPagination from '@/components/ui/sliding-pagination';
 import { CreateJobModal } from '@/components/create-job-modal';
@@ -21,7 +21,7 @@ function BiohazardJobsContent() {
   const [pagination, setPagination] = useState({ page: 1, total: 0, totalPages: 0 });
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [branchFilter, setBranchFilter] = useState<string>('all');
-  const [branches, setBranches] = useState<Branch[]>([]);
+  const [allBranchNames, setAllBranchNames] = useState<string[]>([]);
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const loadJobs = async (page = 1) => {
@@ -48,17 +48,35 @@ function BiohazardJobsContent() {
     loadJobs();
   }, [statusFilter, branchFilter]);
 
-  const loadBranches = async () => {
+  const getBranchNames = (): string[] => {
+    if (allBranchNames.length === 0) {
+      return ['Main Branch', 'Branch A', 'Branch B', 'Branch C'];
+    }
+    return allBranchNames;
+  };
+
+  const loadAllBranches = async () => {
     try {
-      const result = await DataService.getBranches();
-      setBranches(result);
+      const { collection, getDocs } = await import('firebase/firestore');
+      const { db } = await import('@/lib/firebase');
+      const snapshot = await getDocs(collection(db, 'ScannedCheckIN'));
+      const branchSet = new Set<string>();
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.branch && data.branch !== 'N/A') {
+          branchSet.add(data.branch);
+        }
+      });
+      const branchNames = Array.from(branchSet).sort();
+      setAllBranchNames(branchNames);
     } catch (error) {
-      console.error('Error loading branches:', error);
+      console.error('Error loading all branches:', error);
+      setAllBranchNames(['Main Branch', 'Branch A', 'Branch B', 'Branch C']);
     }
   };
 
   useEffect(() => {
-    loadBranches();
+    loadAllBranches();
   }, []);
 
   const handleCreateJob = async (jobData: any) => {
@@ -94,9 +112,9 @@ function BiohazardJobsContent() {
                 </SelectTrigger>
                 <SelectContent className="bg-white dark:bg-[#262626] border border-gray-200 dark:border-[#262626]">
                   <SelectItem value="all" className="text-gray-700 dark:text-[#a1a1a1] text-xs">All</SelectItem>
-                  {branches.map((branch) => (
-                    <SelectItem key={branch.id} value={branch.name} className="text-gray-700 dark:text-[#a1a1a1] text-xs">
-                      {branch.name}
+                  {getBranchNames().map((name) => (
+                    <SelectItem key={name} value={name} className="text-gray-700 dark:text-[#a1a1a1] text-xs">
+                      {name}
                     </SelectItem>
                   ))}
                 </SelectContent>
