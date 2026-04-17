@@ -640,15 +640,17 @@ export class DataService {
 
       console.log('Loaded branches:', branches); // Debug loaded branches
       
-      // Sort branches by number (convert to number for proper sorting)
-      branches.sort((a, b) => {
-        const aNum = parseInt(a.name) || 0;
-        const bNum = parseInt(b.name) || 0;
-        return aNum - bNum;
-      });
+      // Filter to only active branches and sort by number
+      const activeBranches = branches
+        .filter(b => b.status !== 'inactive')
+        .sort((a, b) => {
+          const aNum = parseInt(a.name) || 0;
+          const bNum = parseInt(b.name) || 0;
+          return aNum - bNum;
+        });
       
-      console.log('Sorted branches:', branches); // Debug sorted branches
-      return branches;
+      console.log('Sorted branches:', activeBranches); // Debug sorted branches
+      return activeBranches;
     } catch (error) {
       console.error('Error getting branches:', error);
       return [
@@ -679,16 +681,20 @@ export class DataService {
       const users: User[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
+        const userStatus = data.isDisabled === true ? 'inactive' : 'active';
         users.push({
           id: doc.id,
           email: data.email || 'N/A',
           fullName: data.fullName || data.fullname || 'N/A',
           role: data.role || 'user',
-          status: data.status || 'active'
+          status: userStatus
         });
       });
 
-      return users.sort((a, b) => a.email.localeCompare(b.email));
+      // Filter to only active users
+      return users
+        .filter(u => u.status === 'active')
+        .sort((a, b) => (a.fullName || a.email).localeCompare(b.fullName || b.email));
     } catch (error) {
       console.error('Error loading users:', error);
       return [];
@@ -869,22 +875,18 @@ export class DataService {
   static async getJobs(filters?: {
     type?: 'd-id' | 'biohazard';
     status?: 'pending' | 'active' | 'completed';
+    branch?: string;
     page?: number;
     limit?: number;
   }): Promise<{ data: Job[]; total: number; page: number; totalPages: number }> {
     try {
       const jobsRef = collection(db, 'jobs');
-      const qConstraints: any[] = [];
+      const qConstraints: any[] = [orderBy('createdAt', 'desc')];
 
+      // Filter by type in query, filter status in-memory to avoid composite index
       if (filters?.type) {
         qConstraints.push(where('type', '==', filters.type));
       }
-
-      if (filters?.status) {
-        qConstraints.push(where('status', '==', filters.status));
-      }
-
-      qConstraints.push(orderBy('createdAt', 'desc'));
 
       const baseQuery = query(jobsRef, ...qConstraints);
       const countSnapshot = await getCountFromServer(baseQuery);
@@ -923,17 +925,26 @@ export class DataService {
           afterUrl2: data.afterUrl2 || '',
           afterUrl3: data.afterUrl3 || '',
           afterUrl4: data.afterUrl4 || ''
-        });
+});
       });
 
+      // Apply in-memory status and branch filters
+      let finalJobs = allJobs;
+      if (filters?.status) {
+        finalJobs = finalJobs.filter(job => job.status === filters.status);
+      }
+      if (filters?.branch) {
+        finalJobs = finalJobs.filter(job => job.branch === filters.branch);
+      }
+      
       const startIndex = (page - 1) * limitCount;
-      const pageData = allJobs.slice(startIndex, startIndex + limitCount);
+      const pageData = finalJobs.slice(startIndex, startIndex + limitCount);
 
       return {
         data: pageData,
-        total,
+        total: finalJobs.length,
         page,
-        totalPages: Math.ceil(total / limitCount)
+        totalPages: Math.ceil(finalJobs.length / limitCount)
       };
     } catch (error) {
       console.error('Error loading jobs:', error);

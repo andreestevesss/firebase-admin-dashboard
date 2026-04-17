@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/animated-table-rows';
 import { Badge } from '@/components/ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
-import { DataService, Job } from '@/lib/data-service';
+import { DataService, Job, Branch } from '@/lib/data-service';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import SlidingPagination from '@/components/ui/sliding-pagination';
 import { CreateJobModal } from '@/components/create-job-modal';
@@ -20,6 +20,8 @@ function BiohazardJobsContent() {
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ page: 1, total: 0, totalPages: 0 });
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [branchFilter, setBranchFilter] = useState<string>('all');
+  const [branches, setBranches] = useState<Branch[]>([]);
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const loadJobs = async (page = 1) => {
@@ -28,7 +30,8 @@ function BiohazardJobsContent() {
       setLoading(true);
       const result = await DataService.getJobs({
         type: 'biohazard',
-        status: statusFilter !== 'all' ? statusFilter as 'pending' | 'active' | 'completed' : undefined,
+        status: statusFilter !== 'all' ? statusFilter : undefined,
+        branch: branchFilter !== 'all' ? branchFilter : undefined,
         page,
         limit: 15
       });
@@ -43,7 +46,20 @@ function BiohazardJobsContent() {
 
   useEffect(() => {
     loadJobs();
-  }, [statusFilter]);
+  }, [statusFilter, branchFilter]);
+
+  const loadBranches = async () => {
+    try {
+      const result = await DataService.getBranches();
+      setBranches(result);
+    } catch (error) {
+      console.error('Error loading branches:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadBranches();
+  }, []);
 
   const handleCreateJob = async (jobData: any) => {
     try {
@@ -61,7 +77,7 @@ function BiohazardJobsContent() {
           <CardContent className="p-1">
             <div className="flex items-center gap-4">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-40 h-8 bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-[#262626] text-xs">
+                <SelectTrigger className="w-36 h-8 bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-[#262626] text-xs">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent className="bg-white dark:bg-[#262626] border border-gray-200 dark:border-[#262626]">
@@ -69,6 +85,20 @@ function BiohazardJobsContent() {
                   <SelectItem value="pending" className="text-gray-700 dark:text-[#a1a1a1] text-xs">Pending</SelectItem>
                   <SelectItem value="active" className="text-gray-700 dark:text-[#a1a1a1] text-xs">Active</SelectItem>
                   <SelectItem value="completed" className="text-gray-700 dark:text-[#a1a1a1] text-xs">Completed</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={branchFilter} onValueChange={setBranchFilter}>
+                <SelectTrigger className="w-36 h-8 bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-[#262626] text-xs">
+                  <SelectValue placeholder="Branch" />
+                </SelectTrigger>
+                <SelectContent className="bg-white dark:bg-[#262626] border border-gray-200 dark:border-[#262626]">
+                  <SelectItem value="all" className="text-gray-700 dark:text-[#a1a1a1] text-xs">All</SelectItem>
+                  {branches.map((branch) => (
+                    <SelectItem key={branch.id} value={branch.name} className="text-gray-700 dark:text-[#a1a1a1] text-xs">
+                      {branch.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               

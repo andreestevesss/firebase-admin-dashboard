@@ -121,18 +121,18 @@ export function CreateJobModal({ jobType, isOpen, onClose, onCreate }: CreateJob
             <label className="text-sm font-medium text-gray-700 dark:text-[#a1a1a1]">
               Assign User (Optional)
             </label>
-            <Select value={selectedUserId} onValueChange={setSelectedUserId}>
-              <SelectTrigger className="bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-[#262626]">
-                <SelectValue placeholder="Select user" />
-              </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-[#262626] border border-gray-200 dark:border-[#262626]">
-                {users.map((user) => (
-                  <SelectItem key={user.id} value={user.id} className="text-gray-700 dark:text-[#a1a1a1]">
-                    {user.fullName || user.fullname || user.email}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <select 
+              value={selectedUserId} 
+              onChange={(e) => setSelectedUserId(e.target.value)}
+              className="w-full h-10 px-3 bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-[#262626] rounded-md text-sm text-gray-700 dark:text-[#a1a1a1]"
+            >
+              <option value="">Select user</option>
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.fullName || user.fullname || user.email}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="space-y-2">
