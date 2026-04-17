@@ -43,8 +43,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       setTheme(prefersDark ? 'dark' : 'light');
     }
-    // Load user email (mock for now)
-    setUserEmail('admin@example.com');
+    // Load user email from Firebase auth
+    import('@/lib/firebase').then(({ auth }) => {
+      import('firebase/auth').then(({ onAuthStateChanged }) => {
+        onAuthStateChanged(auth, (user) => {
+          if (user?.email) {
+            setUserEmail(user.email);
+          }
+        });
+      });
+    });
   }, []);
 
   // Apply theme changes
