@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,7 +25,6 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function UserUploadsPage() {
-  const router = useRouter();
   const [allCleans, setAllCleans] = useState<any[]>([]);
   const [allSales, setAllSales] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -93,10 +91,6 @@ export default function UserUploadsPage() {
   }, [allCleans, allSales]);
 
   const totalUploads = userChartData.reduce((sum, u) => sum + u.total, 0);
-
-  const handleShowAll = (userName: string) => {
-    router.push(`/dashboard/daily-cleans?user=${encodeURIComponent(userName)}`);
-  };
 
   return (
     <DashboardLayout>
@@ -202,7 +196,6 @@ export default function UserUploadsPage() {
                     <th className="text-right p-4 text-sm font-medium text-muted-foreground">Daily Cleans</th>
                     <th className="text-right p-4 text-sm font-medium text-muted-foreground">Sales Prep</th>
                     <th className="text-right p-4 text-sm font-medium text-muted-foreground">Total</th>
-                    <th className="text-right p-4 text-sm font-medium text-muted-foreground">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -212,16 +205,6 @@ export default function UserUploadsPage() {
                       <td className="p-4 text-right">{user.dailyCleans}</td>
                       <td className="p-4 text-right">{user.salesPrep}</td>
                       <td className="p-4 text-right font-semibold">{user.total}</td>
-                      <td className="p-4 text-right">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleShowAll(user.user)}
-                          className="text-xs"
-                        >
-                          Show all
-                        </Button>
-                      </td>
                     </tr>
                   ))}
                 </tbody>
