@@ -94,18 +94,6 @@ function DIdJobsContent() {
         <Card className="border border-gray-200 dark:border-[#262626]">
           <CardContent className="p-1">
             <div className="flex items-center gap-4">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-36 h-8 bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-[#262626] text-xs">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-[#262626] border border-gray-200 dark:border-[#262626]">
-                  <SelectItem value="all" className="text-gray-700 dark:text-[#a1a1a1] text-xs">All</SelectItem>
-                  <SelectItem value="pending" className="text-gray-700 dark:text-[#a1a1a1] text-xs">Pending</SelectItem>
-                  <SelectItem value="active" className="text-gray-700 dark:text-[#a1a1a1] text-xs">Active</SelectItem>
-                  <SelectItem value="completed" className="text-gray-700 dark:text-[#a1a1a1] text-xs">Completed</SelectItem>
-                </SelectContent>
-              </Select>
-
               <Select value={branchFilter} onValueChange={setBranchFilter}>
                 <SelectTrigger className="w-36 h-8 bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-[#262626] text-xs">
                   <SelectValue placeholder="Branch" />
@@ -117,6 +105,18 @@ function DIdJobsContent() {
                       {name}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-36 h-8 bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-[#262626] text-xs">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent className="bg-white dark:bg-[#262626] border border-gray-200 dark:border-[#262626]">
+                  <SelectItem value="all" className="text-gray-700 dark:text-[#a1a1a1] text-xs">All</SelectItem>
+                  <SelectItem value="pending" className="text-gray-700 dark:text-[#a1a1a1] text-xs">Pending</SelectItem>
+                  <SelectItem value="active" className="text-gray-700 dark:text-[#a1a1a1] text-xs">Active</SelectItem>
+                  <SelectItem value="completed" className="text-gray-700 dark:text-[#a1a1a1] text-xs">Completed</SelectItem>
                 </SelectContent>
               </Select>
               
