@@ -95,6 +95,7 @@ export interface Job {
   vin?: string;
   picture?: string;
   status: 'pending' | 'active' | 'completed';
+  note?: string;
   assignedUserId: string | null;
   assignedUserName: string;
   createdAt: Date;
@@ -917,6 +918,7 @@ export class DataService {
           assignedUserName: data.assignedUserName || '',
           createdAt,
           createdBy: data.createdBy || '',
+          note: data.note || '',
           beforeUrl1: data.beforeUrl1 || '',
           beforeUrl2: data.beforeUrl2 || '',
           beforeUrl3: data.beforeUrl3 || '',
@@ -963,6 +965,7 @@ export class DataService {
     year?: string;
     vin?: string;
     picture?: string;
+    note?: string;
     createdBy: string;
   }): Promise<string> {
     try {
@@ -976,6 +979,7 @@ export class DataService {
         year: data.year || '',
         vin: data.vin || '',
         picture: data.picture || '',
+        note: data.note || '',
         status: 'pending',
         assignedUserId: null,
         assignedUserName: '',

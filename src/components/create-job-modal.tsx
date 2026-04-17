@@ -33,6 +33,7 @@ export function CreateJobModal({ jobType, isOpen, onClose, onCreate }: CreateJob
   const [loading, setLoading] = useState(false);
   const [loadingVehicle, setLoadingVehicle] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showNote, setShowNote] = useState(false);
   
   const [branch, setBranch] = useState('');
   const [insurance, setInsurance] = useState('');
@@ -40,6 +41,7 @@ export function CreateJobModal({ jobType, isOpen, onClose, onCreate }: CreateJob
   const [model, setModel] = useState('');
   const [year, setYear] = useState('');
   const [vin, setVin] = useState('');
+  const [note, setNote] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -100,6 +102,7 @@ export function CreateJobModal({ jobType, isOpen, onClose, onCreate }: CreateJob
         model: model || undefined,
         year: year || undefined,
         vin: vin || undefined,
+        note: note || undefined,
         assignedUserId: selectedUserId || undefined,
         assignedUserName: selectedUser?.fullName || selectedUser?.fullname || '',
         createdBy: 'admin'
@@ -122,6 +125,7 @@ export function CreateJobModal({ jobType, isOpen, onClose, onCreate }: CreateJob
     setModel('');
     setYear('');
     setVin('');
+    setNote('');
   };
 
   return (
@@ -141,7 +145,7 @@ export function CreateJobModal({ jobType, isOpen, onClose, onCreate }: CreateJob
             <Input
               value={stockNumber}
               onChange={(e) => setStockNumber(e.target.value)}
-              placeholder="Enter stock number - auto-fills from daily cleans"
+              placeholder="Enter stock number"
               className="bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-[#262626]"
             />
           </div>
@@ -164,7 +168,7 @@ export function CreateJobModal({ jobType, isOpen, onClose, onCreate }: CreateJob
             </select>
           </div>
 
-          <div className="space-y-2">
+          <div className="flex items-center gap-4">
             <button
               type="button"
               onClick={() => setShowAdvanced(!showAdvanced)}
@@ -172,7 +176,29 @@ export function CreateJobModal({ jobType, isOpen, onClose, onCreate }: CreateJob
             >
               {showAdvanced ? '- Hide' : '+ Show'} Vehicle Details
             </button>
+            <button
+              type="button"
+              onClick={() => setShowNote(!showNote)}
+              className="text-sm text-green-600 hover:text-green-700"
+            >
+              {showNote ? '- Hide' : '+ Show'} Note
+            </button>
           </div>
+
+          {showNote && (
+            <div className="p-4 bg-gray-50 dark:bg-[#262626] rounded-lg">
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-gray-700 dark:text-[#a1a1a1]">Note</label>
+                <textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Add a note for the job..."
+                  rows={3}
+                  className="w-full px-3 py-2 bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-[#262626] rounded-md text-sm text-gray-700 dark:text-[#a1a1a1]"
+                />
+              </div>
+            </div>
+          )}
 
           {showAdvanced && (
             <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-[#262626] rounded-lg">
