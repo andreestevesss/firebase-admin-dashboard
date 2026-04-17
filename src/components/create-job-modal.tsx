@@ -31,6 +31,7 @@ export function CreateJobModal({ jobType, isOpen, onClose, onCreate }: CreateJob
   const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingVehicle, setLoadingVehicle] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   
   const [branch, setBranch] = useState('');
@@ -46,6 +47,34 @@ export function CreateJobModal({ jobType, isOpen, onClose, onCreate }: CreateJob
       resetForm();
     }
   }, [isOpen]);
+
+  // Auto-fill vehicle info when stock number is entered
+  useEffect(() => {
+    const loadVehicleInfo = async () => {
+      if (stockNumber.trim().length >= 3) {
+        setLoadingVehicle(true);
+        try {
+          const vehicle = await DataService.getVehicleByStock(stockNumber.trim());
+          if (vehicle) {
+            setBranch(vehicle.branch);
+            setInsurance(vehicle.insurance);
+            setMake(vehicle.make);
+            setModel(vehicle.model);
+            setYear(vehicle.year);
+            setVin(vehicle.vin);
+            setShowAdvanced(true);
+          }
+        } catch (error) {
+          console.error('Error loading vehicle:', error);
+        } finally {
+          setLoadingVehicle(false);
+        }
+      }
+    };
+    
+    const timeoutId = setTimeout(loadVehicleInfo, 500);
+    return () => clearTimeout(timeoutId);
+  }, [stockNumber]);
 
   const loadUsers = async () => {
     try {
@@ -107,12 +136,12 @@ export function CreateJobModal({ jobType, isOpen, onClose, onCreate }: CreateJob
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700 dark:text-[#a1a1a1]">
-              Stock Number *
+              Stock Number * {loadingVehicle && <span className="text-xs text-green-600">(loading vehicle...)</span>}
             </label>
             <Input
               value={stockNumber}
               onChange={(e) => setStockNumber(e.target.value)}
-              placeholder="Enter stock number"
+              placeholder="Enter stock number - auto-fills from daily cleans"
               className="bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-[#262626]"
             />
           </div>

@@ -1014,4 +1014,39 @@ export class DataService {
       throw error;
     }
   }
+
+  // Get vehicle info from daily cleans by stock number
+  static async getVehicleByStock(stockNumber: string): Promise<{
+    branch: string;
+    insurance: string;
+    make: string;
+    model: string;
+    year: string;
+    vin: string;
+    picture: string;
+  } | null> {
+    try {
+      const cleansRef = collection(db, 'ScannedCheckIN');
+      const q = query(cleansRef, where('stock', '==', stockNumber), limit(1));
+      const snapshot = await getDocs(q);
+      
+      if (snapshot.empty) {
+        return null;
+      }
+      
+      const data = snapshot.docs[0].data();
+      return {
+        branch: data.branch || '',
+        insurance: data.insurance || '',
+        make: data.make || '',
+        model: data.model || '',
+        year: data.year || '',
+        vin: data.vin || data.VIN || '',
+        picture: data.imageURL || data.picture || ''
+      };
+    } catch (error) {
+      console.error('Error getting vehicle by stock:', error);
+      return null;
+    }
+  }
 }
