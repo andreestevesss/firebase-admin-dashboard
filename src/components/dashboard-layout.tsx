@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Menu, X, LayoutDashboard, Car, Clipboard, Building, Users, Search, Download, Truck, AlertTriangle, BarChart3 } from 'lucide-react';
+import { Menu, X, LayoutDashboard, Car, Clipboard, Building, Users, Search, Download, Truck, AlertTriangle } from 'lucide-react';
 import Switch from '@/components/ui/switch';
 
 interface DashboardLayoutProps {
@@ -22,7 +22,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { id: 'sales-prep', label: 'Sales Prep', icon: Clipboard, href: '/dashboard/sales-prep' },
     { id: 'd-id', label: 'D-ID', icon: Truck, href: '/dashboard/d-id' },
     { id: 'biohazard', label: 'Biohazard', icon: AlertTriangle, href: '/dashboard/biohazard' },
-    { id: 'user-uploads', label: 'User Uploads', icon: BarChart3, href: '/dashboard/user-uploads' },
     { id: 'branches', label: 'Branches', icon: Building, href: '/dashboard/branches' },
     { id: 'users', label: 'Users', icon: Users, href: '/dashboard/users' },
     { id: 'search', label: 'Search', icon: Search, href: '/dashboard/search' },
