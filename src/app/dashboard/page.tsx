@@ -435,10 +435,12 @@ export default function DashboardPage() {
               <CardHeader className="py-4 border-b border-border">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base font-semibold text-foreground">Uploads per User</CardTitle>
-                  <Badge variant="outline" className="text-green-500 bg-green-500/10 border-none hidden sm:inline-flex">
-                    <Users className="h-4 w-4 mr-1" />
-                    <span>{userChartData.length} Users</span>
-                  </Badge>
+                  <Button
+                    onClick={() => router.push(`/dashboard/user-uploads?filter=${encodeURIComponent(selectedDay)}`)}
+                    className="h-7 text-xs bg-green-600 hover:bg-green-700"
+                  >
+                    Show All
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent className="p-4 sm:p-6">
