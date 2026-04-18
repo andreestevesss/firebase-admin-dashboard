@@ -869,6 +869,7 @@ export class DataService {
   static async getJobs(filters?: {
     type?: 'd-id' | 'biohazard';
     status?: 'pending' | 'active' | 'completed';
+    branch?: string;
     page?: number;
     limit?: number;
   }): Promise<{ data: Job[]; total: number; page: number; totalPages: number }> {
@@ -880,6 +881,9 @@ export class DataService {
     }
     if (filters?.status) {
       qConstraints.push(where('status', '==', filters.status));
+    }
+    if (filters?.branch) {
+      qConstraints.push(where('branch', '==', filters.branch));
     }
 
     qConstraints.push(orderBy('createdAt', 'desc'));

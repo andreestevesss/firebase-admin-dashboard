@@ -20,6 +20,8 @@ function DIdJobsContent() {
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ page: 1, total: 0, totalPages: 0 });
   const [statusFilter, setStatusFilter] = useState('all');
+  const [branchFilter, setBranchFilter] = useState('all');
+  const [allBranchNames, setAllBranchNames] = useState<string[]>([]);
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const loadJobs = async (page = 1) => {
@@ -29,6 +31,7 @@ function DIdJobsContent() {
       const result = await DataService.getJobs({
         type: 'd-id',
         status: statusFilter !== 'all' ? statusFilter as 'pending' | 'active' | 'completed' : undefined,
+        branch: branchFilter !== 'all' ? branchFilter : undefined,
         page,
         limit: 15
       });
@@ -41,9 +44,40 @@ function DIdJobsContent() {
     }
   };
 
+  const getBranchNames = (): string[] => {
+    if (allBranchNames.length === 0) {
+      return ['Main Branch', 'Branch A', 'Branch B', 'Branch C'];
+    }
+    return allBranchNames;
+  };
+
+  const loadAllBranches = async () => {
+    try {
+      const { collection, getDocs } = await import('firebase/firestore');
+      const { db } = await import('@/lib/firebase');
+      const snapshot = await getDocs(collection(db, 'ScannedCheckIN'));
+      const branchSet = new Set<string>();
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.branch && data.branch !== 'N/A') {
+          branchSet.add(data.branch);
+        }
+      });
+      const branchNames = Array.from(branchSet).sort();
+      setAllBranchNames(branchNames);
+    } catch (error) {
+      console.error('Error loading all branches:', error);
+      setAllBranchNames(['Main Branch', 'Branch A', 'Branch B', 'Branch C']);
+    }
+  };
+
+  useEffect(() => {
+    loadAllBranches();
+  }, []);
+
   useEffect(() => {
     loadJobs();
-  }, [statusFilter]);
+  }, [statusFilter, branchFilter]);
 
   const handleCreateJob = async (jobData: any) => {
     try {
@@ -60,6 +94,20 @@ function DIdJobsContent() {
         <Card className="border border-gray-200 dark:border-[#262626]">
           <CardContent className="p-1">
             <div className="flex items-center gap-4">
+              <Select value={branchFilter} onValueChange={setBranchFilter}>
+                <SelectTrigger className="w-40 h-8 bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-[#262626] text-xs">
+                  <SelectValue placeholder="Branch" />
+                </SelectTrigger>
+                <SelectContent className="bg-white dark:bg-[#262626] border border-gray-200 dark:border-[#262626]">
+                  <SelectItem value="all" className="text-gray-700 dark:text-[#a1a1a1] text-xs">All</SelectItem>
+                  {getBranchNames().map((name) => (
+                    <SelectItem key={name} value={name} className="text-gray-700 dark:text-[#a1a1a1] text-xs">
+                      {name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-40 h-8 bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-[#262626] text-xs">
                   <SelectValue placeholder="Status" />
