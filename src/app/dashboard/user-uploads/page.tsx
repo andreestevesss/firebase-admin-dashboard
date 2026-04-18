@@ -29,7 +29,7 @@ const chartConfig = {
 function UserUploadsContent() {
   const searchParams = useSearchParams();
   const filter = searchParams.get('filter') || 'This-Week';
-  
+
   const [allCleans, setAllCleans] = useState<any[]>([]);
   const [allSales, setAllSales] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,7 +99,7 @@ function UserUploadsContent() {
     const userData = Object.values(userCounts)
       .filter(u => u.total > 0)
       .sort((a, b) => b.total - a.total);
-    
+
     setUserChartData(userData);
   }, [allCleans, allSales]);
 
@@ -176,16 +176,16 @@ function UserUploadsContent() {
                     tick={{ fontSize: 11 }}
                   />
                   <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dashed" />} />
-                  <Bar 
-                    dataKey="dailyCleans" 
-                    fill="var(--color-dailyCleans)" 
+                  <Bar
+                    dataKey="dailyCleans"
+                    fill="var(--color-dailyCleans)"
                     radius={4}
                   >
                     <LabelList dataKey="dailyCleans" position="top" fill="currentColor" className="fill-foreground font-semibold text-[10px]" formatter={(value: any) => value > 0 ? value : ''} />
                   </Bar>
-                  <Bar 
-                    dataKey="salesPrep" 
-                    fill="var(--color-salesPrep)" 
+                  <Bar
+                    dataKey="salesPrep"
+                    fill="var(--color-salesPrep)"
                     radius={4}
                   >
                     <LabelList dataKey="salesPrep" position="top" fill="currentColor" className="fill-foreground font-semibold text-[10px]" formatter={(value: any) => value > 0 ? value : ''} />
