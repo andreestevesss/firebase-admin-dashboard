@@ -1,7 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Menu, X, LayoutDashboard, Car, Clipboard, Building, Users, Search, Download, Biohazard } from 'lucide-react';
+import { Menu, X, LayoutDashboard, Car, Clipboard, Building, Users, Search, Download, Truck, AlertTriangle } from 'lucide-react';
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 import Switch from '@/components/ui/switch';
 
 interface DashboardLayoutProps {
@@ -20,8 +22,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { id: 'overview', label: 'Overview', icon: LayoutDashboard, href: '/dashboard' },
     { id: 'daily-cleans', label: 'Daily Cleans', icon: Car, href: '/dashboard/daily-cleans' },
     { id: 'sales-prep', label: 'Sales Prep', icon: Clipboard, href: '/dashboard/sales-prep' },
-    { id: 'd-id', label: 'D-ID', icon: Clipboard, href: '/dashboard/d-id' },
-    { id: 'biohazard', label: 'Biohazard', icon: Clipboard, href: '/dashboard/biohazard' },
+    { id: 'd-id', label: 'D-ID', icon: Truck, href: '/dashboard/d-id' },
+    { id: 'biohazard', label: 'Biohazard', icon: AlertTriangle, href: '/dashboard/biohazard' },
     { id: 'branches', label: 'Branches', icon: Building, href: '/dashboard/branches' },
     { id: 'users', label: 'Users', icon: Users, href: '/dashboard/users' },
     { id: 'search', label: 'Search', icon: Search, href: '/dashboard/search' },
@@ -43,8 +45,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       setTheme(prefersDark ? 'dark' : 'light');
     }
-    // Load user email (mock for now)
-    setUserEmail('admin@example.com');
+    // Load actual user email from Firebase auth
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserEmail(user.email || 'user@example.com');
+      }
+    });
+    return () => unsubscribe();
   }, []);
 
   // Apply theme changes
