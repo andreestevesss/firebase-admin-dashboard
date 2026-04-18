@@ -80,6 +80,33 @@ export interface User {
   fullname?: string;
   role: string;
   status: string;
+  branch?: string;
+}
+
+export interface Job {
+  id: string;
+  type: 'd-id' | 'biohazard';
+  status: 'pending' | 'active' | 'completed';
+  branch?: string;
+  insurance?: string;
+  make?: string;
+  model?: string;
+  year?: string;
+  stockNumber?: string;
+  vin?: string;
+  picture?: string;
+  assignedUserId?: string | null;
+  assignedUserName?: string;
+  createdAt: Date;
+  createdBy?: string;
+  beforeUrl1?: string;
+  beforeUrl2?: string;
+  beforeUrl3?: string;
+  beforeUrl4?: string;
+  afterUrl1?: string;
+  afterUrl2?: string;
+  afterUrl3?: string;
+  afterUrl4?: string;
 }
 
 interface CleanFilters {
@@ -836,5 +863,123 @@ export class DataService {
       console.error(`Error loading ${type} for export:`, error);
       throw error;
     }
+  }
+
+  // Get jobs with pagination
+  static async getJobs(filters?: {
+    type?: 'd-id' | 'biohazard';
+    status?: 'pending' | 'active' | 'completed';
+    page?: number;
+    limit?: number;
+  }): Promise<{ data: Job[]; total: number; page: number; totalPages: number }> {
+    const jobsRef = collection(db, 'jobs');
+    const qConstraints: any[] = [];
+
+    if (filters?.type) {
+      qConstraints.push(where('type', '==', filters.type));
+    }
+    if (filters?.status) {
+      qConstraints.push(where('status', '==', filters.status));
+    }
+
+    qConstraints.push(orderBy('createdAt', 'desc'));
+
+    const baseQuery = query(jobsRef, ...qConstraints);
+    const countSnapshot = await getCountFromServer(baseQuery);
+    const total = countSnapshot.data().count;
+
+    const page = filters?.page || 1;
+    const limitCount = filters?.limit || 15;
+    const fetchQuery = query(baseQuery, limit(limitCount * page));
+    const snapshot = await getDocs(fetchQuery);
+
+    const allJobs: Job[] = [];
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const createdAt = data.createdAt ? data.createdAt.toDate() : new Date();
+      allJobs.push({
+        id: doc.id,
+        type: data.type || 'd-id',
+        branch: data.branch || '',
+        insurance: data.insurance || '',
+        make: data.make || '',
+        model: data.model || '',
+        year: data.year || '',
+        stockNumber: data.stockNumber || '',
+        vin: data.vin || '',
+        picture: data.picture || '',
+        status: data.status || 'pending',
+        assignedUserId: data.assignedUserId || null,
+        assignedUserName: data.assignedUserName || '',
+        createdAt,
+        createdBy: data.createdBy || '',
+        beforeUrl1: data.beforeUrl1 || '',
+        beforeUrl2: data.beforeUrl2 || '',
+        beforeUrl3: data.beforeUrl3 || '',
+        beforeUrl4: data.beforeUrl4 || '',
+        afterUrl1: data.afterUrl1 || '',
+        afterUrl2: data.afterUrl2 || '',
+        afterUrl3: data.afterUrl3 || '',
+        afterUrl4: data.afterUrl4 || ''
+      });
+    });
+
+    const startIndex = (page - 1) * limitCount;
+    const pageData = allJobs.slice(startIndex, startIndex + limitCount);
+
+    return {
+      data: pageData,
+      total,
+      page,
+      totalPages: Math.ceil(total / limitCount)
+    };
+  }
+
+  // Create a new job
+  static async createJob(data: {
+    type: 'd-id' | 'biohazard';
+    stockNumber: string;
+    branch?: string;
+    insurance?: string;
+    make?: string;
+    model?: string;
+    year?: string;
+    vin?: string;
+    picture?: string;
+    createdBy: string;
+  }): Promise<string> {
+    const docRef = await addDoc(collection(db, 'jobs'), {
+      type: data.type,
+      stockNumber: data.stockNumber,
+      branch: data.branch || '',
+      insurance: data.insurance || '',
+      make: data.make || '',
+      model: data.model || '',
+      year: data.year || '',
+      vin: data.vin || '',
+      picture: data.picture || '',
+      status: 'pending',
+      assignedUserId: null,
+      assignedUserName: '',
+      createdAt: Timestamp.now(),
+      createdBy: data.createdBy
+    });
+    return docRef.id;
+  }
+
+  // Assign a job to a user
+  static async assignJob(jobId: string, userId: string, userName: string): Promise<void> {
+    const docRef = doc(db, 'jobs', jobId);
+    await updateDoc(docRef, {
+      assignedUserId: userId,
+      assignedUserName: userName,
+      status: 'active'
+    });
+  }
+
+  // Update job status
+  static async updateJobStatus(jobId: string, status: 'pending' | 'active' | 'completed'): Promise<void> {
+    const docRef = doc(db, 'jobs', jobId);
+    await updateDoc(docRef, { status });
   }
 }
