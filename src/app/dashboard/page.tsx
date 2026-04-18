@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DataService, DashboardStats, Branch, User } from '@/lib/data-service';
-import { TrendingUp, Car, ClipboardList, MapPin, Users, ArrowUpRight, MoreHorizontal } from 'lucide-react';
+import { TrendingUp, Car, ClipboardList, MapPin, Users, Building, MoreHorizontal } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Bar, BarChart, XAxis, LabelList, Cell } from "recharts";
 import {
@@ -386,7 +386,7 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base font-semibold text-foreground">Activity per Branch</CardTitle>
                   <Badge variant="outline" className="text-blue-500 bg-blue-500/10 border-none hidden sm:inline-flex">
-                    <TrendingUp className="h-4 w-4 mr-1" />
+                    <Building className="h-4 w-4 mr-1" />
                     <span>{chartData.length} Branches</span>
                   </Badge>
                 </div>
