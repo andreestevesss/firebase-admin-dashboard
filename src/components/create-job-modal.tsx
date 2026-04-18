@@ -30,6 +30,7 @@ export function CreateJobModal({ jobType, isOpen, onClose, onCreate }: CreateJob
   const [stockNumber, setStockNumber] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [users, setUsers] = useState<User[]>([]);
+  const [branches, setBranches] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   
@@ -43,6 +44,7 @@ export function CreateJobModal({ jobType, isOpen, onClose, onCreate }: CreateJob
   useEffect(() => {
     if (isOpen) {
       loadUsers();
+      loadBranches();
       resetForm();
     }
   }, [isOpen]);
@@ -53,6 +55,27 @@ export function CreateJobModal({ jobType, isOpen, onClose, onCreate }: CreateJob
       setUsers(result);
     } catch (error) {
       console.error('Error loading users:', error);
+    }
+  };
+
+  const loadBranches = async () => {
+    try {
+      const result = await DataService.getBranches();
+      const branchNames = result
+        .filter(b => b.status === 'active')
+        .map(b => b.name)
+        .sort();
+      setBranches(branchNames);
+    } catch (error) {
+      console.error('Error loading branches:', error);
+    }
+  };
+
+  const handleUserChange = (userId: string) => {
+    setSelectedUserId(userId);
+    const selectedUser = users.find(u => u.id === userId);
+    if (selectedUser?.branch) {
+      setBranch(selectedUser.branch);
     }
   };
 
@@ -121,7 +144,7 @@ export function CreateJobModal({ jobType, isOpen, onClose, onCreate }: CreateJob
             <label className="text-sm font-medium text-gray-700 dark:text-[#a1a1a1]">
               Assign User (Optional)
             </label>
-            <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+            <Select value={selectedUserId} onValueChange={handleUserChange}>
               <SelectTrigger className="bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-[#262626]">
                 <SelectValue placeholder="Select user" />
               </SelectTrigger>
@@ -149,12 +172,18 @@ export function CreateJobModal({ jobType, isOpen, onClose, onCreate }: CreateJob
             <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-[#262626] rounded-lg">
               <div className="space-y-2">
                 <label className="text-xs font-medium text-gray-700 dark:text-[#a1a1a1]">Branch</label>
-                <Input
-                  value={branch}
-                  onChange={(e) => setBranch(e.target.value)}
-                  placeholder="Branch"
-                  className="bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-[#262626]"
-                />
+                <Select value={branch} onValueChange={setBranch}>
+                  <SelectTrigger className="bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-[#262626]">
+                    <SelectValue placeholder="Select branch" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white dark:bg-[#262626] border border-gray-200 dark:border-[#262626]">
+                    {branches.map((branchName) => (
+                      <SelectItem key={branchName} value={branchName} className="text-gray-700 dark:text-[#a1a1a1]">
+                        {branchName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-medium text-gray-700 dark:text-[#a1a1a1]">Insurance</label>
