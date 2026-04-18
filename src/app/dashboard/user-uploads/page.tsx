@@ -204,7 +204,7 @@ function UserUploadsContent() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border bg-muted/50">
-                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">User</th>
+                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">User Details</th>
                     <th className="text-right p-4 text-sm font-medium text-muted-foreground">Daily Cleans</th>
                     <th className="text-right p-4 text-sm font-medium text-muted-foreground">Sales Prep</th>
                     <th className="text-right p-4 text-sm font-medium text-muted-foreground">Total</th>
