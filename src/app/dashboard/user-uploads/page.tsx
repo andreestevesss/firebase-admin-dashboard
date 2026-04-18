@@ -5,6 +5,7 @@ import { DashboardLayout } from '@/components/dashboard-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DataService } from '@/lib/data-service';
 import { Users, BarChart3, Car, ClipboardList } from 'lucide-react';
 import { Bar, BarChart, XAxis, LabelList, Cell } from "recharts";
@@ -113,9 +114,27 @@ function UserUploadsContent() {
             <h1 className="text-2xl font-semibold text-foreground dark:text-white">User Uploads</h1>
             <p className="text-muted-foreground dark:text-gray-300">View all user upload activity</p>
           </div>
-          <Button onClick={loadData} disabled={loading}>
-            {loading ? 'Loading...' : 'Refresh'}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Select value={dateRange} onValueChange={setDateRange}>
+              <SelectTrigger className="w-40 h-8">
+                <SelectValue placeholder="Filter" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="This-Week">This Week</SelectItem>
+                <SelectItem value="Last-Week">Last Week</SelectItem>
+                <SelectItem value="1">Monday</SelectItem>
+                <SelectItem value="2">Tuesday</SelectItem>
+                <SelectItem value="3">Wednesday</SelectItem>
+                <SelectItem value="4">Thursday</SelectItem>
+                <SelectItem value="5">Friday</SelectItem>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="all">All Time</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button onClick={loadData} disabled={loading}>
+              {loading ? 'Loading...' : 'Refresh'}
+            </Button>
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
