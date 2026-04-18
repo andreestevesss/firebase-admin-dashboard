@@ -197,8 +197,7 @@ function UserUploadsContent() {
         </Card>
 
         <Card className="border border-border">
-          <CardHeader className="py-4 border-b border-border">
-            <CardTitle className="text-base font-semibold text-foreground">User Details</CardTitle>
+          <CardHeader className="py-4 border-b border-border hidden">
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
