@@ -41,8 +41,8 @@ function UserUploadsContent() {
     try {
       setLoading(true);
       const [cleansRes, salesRes] = await Promise.all([
-        DataService.getDailyCleans({ limit: 1000, dateRange: dateRange as any }),
-        DataService.getSalesPrepData({ limit: 1000, dateRange: dateRange as any })
+        DataService.getDailyCleans({ limit: 10000, dateRange: dateRange as any }),
+        DataService.getSalesPrepData({ limit: 10000, dateRange: dateRange as any })
       ]);
       setAllCleans(cleansRes.data);
       setAllSales(salesRes.data);
@@ -120,15 +120,10 @@ function UserUploadsContent() {
                 <SelectValue placeholder="Filter" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="This-Week">This Week</SelectItem>
-                <SelectItem value="Last-Week">Last Week</SelectItem>
-                <SelectItem value="1">Monday</SelectItem>
-                <SelectItem value="2">Tuesday</SelectItem>
-                <SelectItem value="3">Wednesday</SelectItem>
-                <SelectItem value="4">Thursday</SelectItem>
-                <SelectItem value="5">Friday</SelectItem>
-                <SelectItem value="today">Today</SelectItem>
-                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="this week">This Week</SelectItem>
+                <SelectItem value="last week">Last Week</SelectItem>
+                <SelectItem value="this month">This Month</SelectItem>
+                <SelectItem value="last month">Last Month</SelectItem>
               </SelectContent>
             </Select>
             <Button onClick={loadData} disabled={loading}>
