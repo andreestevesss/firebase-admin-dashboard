@@ -1,5 +1,5 @@
 'use client';
-import { GenerativeMountainScene } from "@/components/ui/mountain-scene";
+import ParticlesComponent from "@/components/ui/particles-bg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,13 +39,15 @@ export default function LoginPage() {
 
   return (
     <div className={`relative min-h-screen overflow-hidden ${theme === 'dark' ? 'dark' : ''}`}>
-      {/* Mountain Background */}
-      <GenerativeMountainScene />
+      {/* Particles Background - z-index allows interaction */}
+      <div className="absolute inset-0 z-0">
+        <ParticlesComponent />
+      </div>
       
       {/* Theme Toggle Button */}
       <button
         onClick={toggleTheme}
-        className="absolute top-4 right-4 z-30 p-2 rounded-full bg-white/20 dark:bg-gray-800/20 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 hover:bg-white/30 dark:hover:bg-gray-700/30 transition-all duration-300"
+        className="absolute top-4 right-4 z-30 p-2 rounded-full bg-white/20 dark:bg-gray-800/20 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 hover:bg-white/30 dark:hover:bg-gray-700/30 transition-all duration-300 pointer-events-auto"
         title="Toggle theme"
       >
         {theme === 'light' ? (
@@ -56,8 +58,8 @@ export default function LoginPage() {
       </button>
       
       {/* Login Form Overlay */}
-      <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="relative z-20 w-full max-w-sm">
+      <div className="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+        <div className="relative z-10 w-full max-w-sm pointer-events-auto">
           <Card className={`bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg border border-gray-200/50 dark:border-gray-700/50 shadow-2xl ${theme === 'dark' ? 'dark' : ''}`}>
             <CardHeader className="text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-green-500/10 rounded-full mb-4 mx-auto">
