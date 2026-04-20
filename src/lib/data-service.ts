@@ -12,7 +12,8 @@ import {
   limit, 
   startAfter,
   Timestamp,
-  getCountFromServer
+  getCountFromServer,
+  Query
 } from 'firebase/firestore';
 import { db } from './firebase';
 
@@ -673,13 +674,26 @@ export class DataService {
   }
 
   // Get users
-  static async getUsers(): Promise<User[]> {
+  static async getUsers(options?: { branch?: string; status?: 'active' | 'inactive' }): Promise<User[]> {
     try {
-      const snapshot = await getDocs(collection(db, 'users'));
+      let q: Query = collection(db, 'users');
+      
+      if (options?.branch) {
+        q = query(collection(db, 'users'), where('branch', '==', options.branch));
+      }
+      
+      const snapshot = await getDocs(q);
       
       const users: User[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
+        
+        if (options?.status) {
+          const isDisabled = data.isDisabled === true;
+          const userStatus = isDisabled ? 'inactive' : 'active';
+          if (userStatus !== options.status) return;
+        }
+        
         users.push({
           id: doc.id,
           email: data.email || 'N/A',

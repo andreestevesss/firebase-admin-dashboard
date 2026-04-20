@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/animated-table-rows';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DataService, User } from '@/lib/data-service';
+import { DataService, User, Branch } from '@/lib/data-service';
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, Edit, Plus, Users, Shield, Crown } from "lucide-react";
 import { UserModal } from '@/components/user-modal';
@@ -14,10 +14,12 @@ import { UserModal } from '@/components/user-modal';
 export default function UsersPage() {
   // Data states
   const [users, setUsers] = useState<User[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
   const [selectedBranch, setSelectedBranch] = useState('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [loading, setLoading] = useState({
-    users: false
+    users: false,
+    branches: false
   });
 
   // Modal states
@@ -29,7 +31,10 @@ export default function UsersPage() {
   const loadUsers = async () => {
     try {
       setLoading(prev => ({ ...prev, users: true }));
-      const result = await DataService.getUsers();
+      const result = await DataService.getUsers({
+        branch: selectedBranch !== 'all' ? selectedBranch : undefined,
+        status: statusFilter !== 'all' ? statusFilter : undefined
+      });
       setUsers(result);
     } catch (error) {
       console.error('Error loading users:', error);
@@ -38,17 +43,23 @@ export default function UsersPage() {
     }
   };
 
+  const loadBranches = async () => {
+    try {
+      setLoading(prev => ({ ...prev, branches: true }));
+      const result = await DataService.getBranches();
+      setBranches(result);
+    } catch (error) {
+      console.error('Error loading branches:', error);
+    } finally {
+      setLoading(prev => ({ ...prev, branches: false }));
+    }
+  };
+
   // Effects
   useEffect(() => {
     loadUsers();
+    loadBranches();
   }, [selectedBranch, statusFilter]);
-
-  // Filter users based on status
-  const filteredUsers = users.filter(user => {
-    const userStatus = user.isDisabled === true ? 'inactive' : 'active';
-    if (statusFilter === 'all') return true;
-    return userStatus === statusFilter;
-  });
 
   // Modal handlers
   const handleAddUser = () => {
@@ -140,8 +151,13 @@ export default function UsersPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Branches</SelectItem>
-                  <SelectItem value="branch1">Branch 1</SelectItem>
-                  <SelectItem value="branch2">Branch 2</SelectItem>
+                  {branches
+                    .filter(b => b.status === 'active')
+                    .map(branch => (
+                      <SelectItem key={branch.id} value={branch.name}>
+                        {branch.name}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
               
@@ -198,7 +214,7 @@ export default function UsersPage() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredUsers.map((user, index) => (
+                      users.map((user, index) => (
                         <motion.tr
                           key={user.id}
                           layout
