@@ -79,7 +79,8 @@ export interface User {
   fullName?: string;
   fullname?: string;
   role: string;
-  status: string;
+  status?: string;
+  isDisabled?: boolean;
   branch?: string;
 }
 

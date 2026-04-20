@@ -15,7 +15,7 @@ export default function UsersPage() {
   // Data states
   const [users, setUsers] = useState<User[]>([]);
   const [selectedBranch, setSelectedBranch] = useState('all');
-  const [dateRange, setDateRange] = useState<'yesterday' | 'today' | 'last week' | 'this week' | 'last month' | 'this month'>('today');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [loading, setLoading] = useState({
     users: false
   });
@@ -41,7 +41,14 @@ export default function UsersPage() {
   // Effects
   useEffect(() => {
     loadUsers();
-  }, [selectedBranch, dateRange]);
+  }, [selectedBranch, statusFilter]);
+
+  // Filter users based on status
+  const filteredUsers = users.filter(user => {
+    const userStatus = user.isDisabled === true ? 'inactive' : 'active';
+    if (statusFilter === 'all') return true;
+    return userStatus === statusFilter;
+  });
 
   // Modal handlers
   const handleAddUser = () => {
@@ -138,17 +145,14 @@ export default function UsersPage() {
                 </SelectContent>
               </Select>
               
-              <Select value={dateRange} onValueChange={(value: any) => setDateRange(value)}>
+              <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
                 <SelectTrigger className="w-48 bg-background border-border text-foreground">
-                  <SelectValue placeholder="Select date range" />
+                  <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="yesterday">Yesterday</SelectItem>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="last week">Last Week</SelectItem>
-                  <SelectItem value="this week">This Week</SelectItem>
-                  <SelectItem value="last month">Last Month</SelectItem>
-                  <SelectItem value="this month">This Month</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -194,7 +198,7 @@ export default function UsersPage() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      users.map((user, index) => (
+                      filteredUsers.map((user, index) => (
                         <motion.tr
                           key={user.id}
                           layout
@@ -219,8 +223,8 @@ export default function UsersPage() {
                              <span className="text-muted-foreground">{user.role || 'user'}</span>
                            </TableCell>
                            <TableCell className="p-4">
-                             <Badge className="bg-green-500/20 text-green-500 border-none hover:bg-green-500/20">
-                               {user.status || 'active'}
+                             <Badge className={user.isDisabled === true ? "bg-red-500/20 text-red-500 border-none" : "bg-green-500/20 text-green-500 border-none"}>
+                               {user.isDisabled === true ? 'inactive' : 'active'}
                              </Badge>
                            </TableCell>
                            <TableCell className="p-4">
