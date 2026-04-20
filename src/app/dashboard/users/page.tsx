@@ -170,9 +170,9 @@ export default function UsersPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50 hover:bg-muted/50 border-b border-border">
-                    <TableHead className="text-sm font-medium text-muted-foreground">ID</TableHead>
                     <TableHead className="text-sm font-medium text-muted-foreground">Name</TableHead>
                     <TableHead className="text-sm font-medium text-muted-foreground">Email</TableHead>
+                    <TableHead className="text-sm font-medium text-muted-foreground">Branch</TableHead>
                     <TableHead className="text-sm font-medium text-muted-foreground">Role</TableHead>
                     <TableHead className="text-sm font-medium text-muted-foreground">Status</TableHead>
                     <TableHead className="text-sm font-medium text-muted-foreground text-right">Actions</TableHead>
@@ -204,44 +204,27 @@ export default function UsersPage() {
                           transition={{ duration: 0.3, delay: index * 0.05 }}
                           className="border-b border-border hover:bg-muted/50 transition-colors"
                         >
-                          <TableCell className="p-4">
-                            <span className="text-muted-foreground text-xs">{user.id}</span>
-                          </TableCell>
-                          <TableCell className="p-4">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-                                <span className="text-sm font-medium text-foreground">
-                                  {(user.fullName || user.fullname || 'U').charAt(0).toUpperCase()}
-                                </span>
-                              </div>
-                              <div>
-                                <p className="font-medium text-foreground">
-                                  {user.fullName || user.fullname || 'Unknown User'}
-                                </p>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="p-4">
-                            <span className="text-muted-foreground">{user.email}</span>
-                          </TableCell>
-                          <TableCell className="p-4">
-                            <Badge className={getRoleColor(user.role || 'user')}>
-                              <div className="flex items-center space-x-1">
-                                {getRoleIcon(user.role || 'user')}
-                                <span>{user.role || 'user'}</span>
-                              </div>
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="p-4">
-                            <Badge className="bg-green-500/20 text-green-500 border-none hover:bg-green-500/20">
-                              {user.status || 'active'}
-                            </Badge>
-                          </TableCell>
                            <TableCell className="p-4">
-                             <div className="flex items-center justify-end space-x-2">
-                               <Button variant="ghost" size="sm" className="h-8 w-8 hover:bg-muted text-muted-foreground" onClick={() => handleViewUser(user)}>
-                                 <Eye className="h-4 w-4" />
-                               </Button>
+                             <p className="font-medium text-foreground">
+                               {user.fullName || user.fullname || 'Unknown User'}
+                             </p>
+                           </TableCell>
+                           <TableCell className="p-4">
+                             <span className="text-muted-foreground">{user.email}</span>
+                           </TableCell>
+                           <TableCell className="p-4">
+                             <span className="text-muted-foreground">{user.branch || 'No Branch'}</span>
+                           </TableCell>
+                           <TableCell className="p-4">
+                             <span className="text-muted-foreground">{user.role || 'user'}</span>
+                           </TableCell>
+                           <TableCell className="p-4">
+                             <Badge className="bg-green-500/20 text-green-500 border-none hover:bg-green-500/20">
+                               {user.status || 'active'}
+                             </Badge>
+                           </TableCell>
+                           <TableCell className="p-4">
+                             <div className="flex items-center justify-end">
                                <Button variant="ghost" size="sm" className="h-8 w-8 hover:bg-muted text-muted-foreground" onClick={() => handleEditUser(user)}>
                                  <Edit className="h-4 w-4" />
                                </Button>
