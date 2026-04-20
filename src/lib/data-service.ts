@@ -685,7 +685,8 @@ export class DataService {
           email: data.email || 'N/A',
           fullName: data.fullName || data.fullname || 'N/A',
           role: data.role || 'user',
-          status: data.status || 'active'
+          branch: data.branch || '',
+          isDisabled: data.isDisabled || false
         });
       });
 

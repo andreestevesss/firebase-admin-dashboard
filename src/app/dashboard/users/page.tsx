@@ -220,7 +220,12 @@ export default function UsersPage() {
                              <span className="text-muted-foreground">{user.branch || 'No Branch'}</span>
                            </TableCell>
                            <TableCell className="p-4">
-                             <span className="text-muted-foreground">{user.role || 'user'}</span>
+                             <Badge className={getRoleColor(user.role || 'user')}>
+                               <div className="flex items-center space-x-1">
+                                 {getRoleIcon(user.role || 'user')}
+                                 <span>{user.role || 'user'}</span>
+                               </div>
+                             </Badge>
                            </TableCell>
                            <TableCell className="p-4">
                              <Badge className={user.isDisabled === true ? "bg-red-500/20 text-red-500 border-none" : "bg-green-500/20 text-green-500 border-none"}>
