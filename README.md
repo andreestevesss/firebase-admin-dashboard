@@ -8,7 +8,6 @@ A premium, high-performance admin dashboard built with **React**, **Next.js 16**
 
 - **D-ID & Biohazard Job Management**: Create and track vehicle identification (D-ID) and biohazard cleaning jobs. Assign jobs to users, track status (Pending/Active/Completed), and manage vehicle details.
 - **User Uploads Page**: View all user upload activity with filters (This Week, Last Week, This Month, Last Month). Shows every user's daily cleans and sales prep.
-- **Interactive Login Background**: Animated particles background with hover/click interactions and dark mode support.
 
 ---
 
