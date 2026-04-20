@@ -7,6 +7,14 @@ Documentation of all commits pushed to GitHub since the initial implementation.
 
 ## Commit History
 
+### 2026-04-20
+
+| Commit | Description | Files Modified |
+|--------|-------------|-------------|
+| `4219a4c` | feat: update users filter by status instead of dates | users/page.tsx, data-service.ts |
+| `8f3341f` | feat: update users table layout and simplify actions | users/page.tsx |
+| `e64af04` | feat: add user management modal with CRUD operations | user-modal.tsx (new), users/page.tsx |
+
 ### 2026-04-18
 
 | Commit | Description | Files Modified |
@@ -54,6 +62,24 @@ Documentation of all commits pushed to GitHub since the initial implementation.
 
 ### 5. Create Job Modal
 - Branch auto-fills when selecting a user
+
+### 6. User Management (New)
+- **User Modal Component**: Complete CRUD interface for user management
+- **Add Users**: Click "Add User" button to create new accounts
+- **Edit Users**: Click edit button to modify existing user information
+- **Form Fields**: Full Name, Email, Role (Admin/Manager/User), Status (Active/Inactive), Branch assignment
+- **Integration**: Proper Firestore integration with timestamps
+- **Validation**: Form validation and loading states
+- **Auto-refresh**: User list updates automatically after changes
+
+### 7. Users Table Layout
+- Reordered columns: Name, Email, Branch, Role, Status
+- Removed avatar from name column for cleaner look
+- Single edit button (removed view button)
+- Role displayed as text without icons
+- **Filters**: Status filter (All/Active/Inactive) instead of date range
+- **Status Source**: Reads from Firestore `isDisabled` field (true = inactive)
+- Status badge: green for active, red for inactive
 
 ---
 
