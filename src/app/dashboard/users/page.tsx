@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DataService, User } from '@/lib/data-service';
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, Edit, Plus, Users, Shield, Crown } from "lucide-react";
+import { UserModal } from '@/components/user-modal';
 
 export default function UsersPage() {
   // Data states
@@ -18,6 +19,11 @@ export default function UsersPage() {
   const [loading, setLoading] = useState({
     users: false
   });
+
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [modalMode, setModalMode] = useState<'edit' | 'add'>('add');
 
   // Load data
   const loadUsers = async () => {
@@ -36,6 +42,44 @@ export default function UsersPage() {
   useEffect(() => {
     loadUsers();
   }, [selectedBranch, dateRange]);
+
+  // Modal handlers
+  const handleAddUser = () => {
+    setSelectedUser(null);
+    setModalMode('add');
+    setIsModalOpen(true);
+  };
+
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user);
+    setModalMode('edit');
+    setIsModalOpen(true);
+  };
+
+  const handleViewUser = (user: User) => {
+    setSelectedUser(user);
+    setModalMode('edit');
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedUser(null);
+  };
+
+  const handleUserSave = (savedUser: User) => {
+    setUsers(prevUsers => {
+      const existingIndex = prevUsers.findIndex(u => u.id === savedUser.id);
+      if (existingIndex >= 0) {
+        const updatedUsers = [...prevUsers];
+        updatedUsers[existingIndex] = savedUser;
+        return updatedUsers;
+      } else {
+        return [...prevUsers, savedUser];
+      }
+    });
+    loadUsers();
+  };
 
   // Get role icon
   const getRoleIcon = (role: string) => {
@@ -108,7 +152,7 @@ export default function UsersPage() {
                 </SelectContent>
               </Select>
 
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+              <Button onClick={handleAddUser} className="bg-primary text-primary-foreground hover:bg-primary/90">
                 <Plus className="w-4 h-4 mr-2" />
                 Add User
               </Button>
@@ -193,16 +237,16 @@ export default function UsersPage() {
                               {user.status || 'active'}
                             </Badge>
                           </TableCell>
-                          <TableCell className="p-4">
-                            <div className="flex items-center justify-end space-x-2">
-                              <Button variant="ghost" size="sm" className="h-8 w-8 hover:bg-muted text-muted-foreground">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 hover:bg-muted text-muted-foreground">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
+                           <TableCell className="p-4">
+                             <div className="flex items-center justify-end space-x-2">
+                               <Button variant="ghost" size="sm" className="h-8 w-8 hover:bg-muted text-muted-foreground" onClick={() => handleViewUser(user)}>
+                                 <Eye className="h-4 w-4" />
+                               </Button>
+                               <Button variant="ghost" size="sm" className="h-8 w-8 hover:bg-muted text-muted-foreground" onClick={() => handleEditUser(user)}>
+                                 <Edit className="h-4 w-4" />
+                               </Button>
+                             </div>
+                           </TableCell>
                         </motion.tr>
                       ))
                     )}
@@ -212,6 +256,15 @@ export default function UsersPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* User Modal */}
+        <UserModal
+          user={selectedUser}
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          onSave={handleUserSave}
+          mode={modalMode}
+        />
       </div>
     </DashboardLayout>
   );

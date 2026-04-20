@@ -2,11 +2,15 @@
 import { useRef, useEffect } from "react";
 import * as THREE from "three";
 
+interface MountainSceneProps {
+  theme?: 'light' | 'dark';
+}
+
 /**
  * GenerativeMountainScene
  * Renders a solid, undulating mountain landscape.
  */
-export function GenerativeMountainScene() {
+export function GenerativeMountainScene({ theme = 'light' }: MountainSceneProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const lightRef = useRef<THREE.PointLight | null>(null);
 
@@ -14,6 +18,11 @@ export function GenerativeMountainScene() {
     if (!mountRef.current) return;
 
     const currentMount = mountRef.current;
+    
+    // Get theme-aware colors
+    const isDark = theme === 'dark';
+    const skyColor = isDark ? "#1e293b" : "#7dd3fc"; // dark slate for dark mode, light blue for light
+    const mountainColor = isDark ? "#0f172a" : "#475569"; // dark mountain for dark mode
     
     // SCENE SETUP
     const scene = new THREE.Scene();
@@ -43,7 +52,8 @@ export function GenerativeMountainScene() {
       uniforms: {
         time: { value: 0 },
         pointLightPosition: { value: new THREE.Vector3(0, 0, 5) },
-        color: { value: new THREE.Color("#7dd3fc") },
+        color: { value: new THREE.Color(skyColor) },
+        mountainColor: { value: new THREE.Color(mountainColor) },
       },
       vertexShader: `
         uniform float time;
@@ -117,6 +127,7 @@ export function GenerativeMountainScene() {
       `,
       fragmentShader: `
         uniform vec3 color;
+        uniform vec3 mountainColor;
         uniform vec3 pointLightPosition;
         varying vec3 vNormal;
         varying vec3 vPosition;
@@ -130,7 +141,11 @@ export function GenerativeMountainScene() {
             float fresnel = 1.0 - dot(normal, vec3(0.0, 0.0, 1.0));
             fresnel = pow(fresnel, 2.0);
             
-            vec3 finalColor = color * diffuse + color * fresnel * 0.5;
+            // Mix sky color and mountain based on height
+            float height = vPosition.y * 0.5 + 0.5;
+            vec3 baseColor = mix(color, mountainColor, height * 0.8);
+            
+            vec3 finalColor = baseColor * diffuse + color * fresnel * 0.3;
             
             gl_FragColor = vec4(finalColor, 1.0);
         }
