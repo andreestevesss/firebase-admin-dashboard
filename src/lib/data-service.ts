@@ -80,6 +80,16 @@ export interface User {
   fullName?: string;
   fullname?: string;
   role: string;
+  branch?: string;
+  isDisabled?: boolean;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  fullName?: string;
+  fullname?: string;
+  role: string;
   status?: string;
   isDisabled?: boolean;
   branch?: string;

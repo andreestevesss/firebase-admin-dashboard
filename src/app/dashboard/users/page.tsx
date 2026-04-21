@@ -43,6 +43,12 @@ export default function UsersPage() {
     }
   };
 
+  // Get display name for branch
+  const getBranchDisplayName = (branchName: string) => {
+    const branch = branches.find(b => b.location === branchName);
+    return branch ? branch.location : branchName;
+  };
+
   const loadBranches = async () => {
     try {
       setLoading(prev => ({ ...prev, branches: true }));
@@ -154,8 +160,8 @@ export default function UsersPage() {
                   {branches
                     .filter(b => b.status === 'active')
                     .map(branch => (
-                      <SelectItem key={branch.id} value={branch.name}>
-                        {branch.name}
+                      <SelectItem key={branch.id} value={branch.location}>
+                        {branch.location}
                       </SelectItem>
                     ))}
                 </SelectContent>
