@@ -714,7 +714,7 @@ export class DataService {
         });
       });
 
-      return users.sort((a, b) => a.fullName.localeCompare(b.fullName));
+      return users.sort((a, b) => (a.fullName || '').localeCompare(b.fullName || ''));
     } catch (error) {
       console.error('Error loading users:', error);
       return [];
