@@ -436,7 +436,19 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base font-semibold text-foreground">Uploads per User</CardTitle>
                   <Button
-                    onClick={() => router.push(`/dashboard/user-uploads?filter=${encodeURIComponent(selectedDay)}`)}
+                    onClick={() => {
+                      const filterMap: Record<string, string> = {
+                        'This-Week': 'this week',
+                        'Last-Week': 'last week',
+                        '1': 'this week',
+                        '2': 'this week',
+                        '3': 'this week',
+                        '4': 'this week',
+                        '5': 'this week'
+                      };
+                      const filterValue = filterMap[selectedDay] || 'this week';
+                      router.push(`/dashboard/user-uploads?filter=${encodeURIComponent(filterValue)}`);
+                    }}
                     className="h-7 text-xs bg-green-600 hover:bg-green-700"
                   >
                     Show All
