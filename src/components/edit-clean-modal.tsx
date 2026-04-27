@@ -607,17 +607,6 @@ export function EditCleanModal({
                       )}
                       Magic Fix
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleSmartFix}
-                      disabled={isDetecting}
-                      className="h-7 px-2 border-gray-200 dark:border-[#404040] text-xs gap-1 bg-green-50/50 dark:bg-green-900/10 text-green-600 dark:text-green-400 border-green-100 dark:border-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/20"
-                      title="Extract Car Details Only"
-                    >
-                      <Wand2 className="w-3.5 h-3.5" />
-                      Extract Details
-                    </Button>
                   </div>
                 </div>
 
