@@ -16,17 +16,11 @@ The Daily Cleans feature tracks vehicle clean records across branches.
 | Button | Function |
 |--------|----------|
 | Rotate | Manually rotate image 90° |
-| Magic Fix | AI auto-detects orientation AND extracts car details |
-| Extract Details | AI extracts details without changing rotation |
+| Magic Fix | AI auto-detects orientation (runs automatically on open) |
+
+The **AI Scanner Line** animates across the image while Magic Fix is running.
 
 ## 4. Save Changes
 - Click **Save Changes**
 - Saves to Firebase Firestore (`ScannedCheckIN` collection)
 - Modal closes, table refreshes
-
-## AI Detection
-Magic Fix uses Tesseract OCR to:
-1. Test 4 rotation angles
-2. Find best orientation (prioritizes original photo)
-3. Extract: Stock#, Insurance, Make, Model, Year, VIN
-4. Auto-fill empty fields only

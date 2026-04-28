@@ -71,7 +71,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] flex">
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
@@ -105,7 +105,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               {menuItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeSection === item.id;
-                
+
                 return (
                   <li key={item.id}>
                     <button
@@ -151,16 +151,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <span className="text-lg font-semibold text-gray-900 dark:text-[#fafafa]">
-                Admin Dashboard {activeSection === 'daily-cleans' && '| Daily Cleans'}
+                Admin Dashboard {activeSection === 'daily-cleans' && '- Daily Cleans'}
               </span>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600 dark:text-[#a1a1a1]">{userEmail}</span>
               <div className="flex items-center mx-2" title="Toggle Theme">
                 {mounted && (
-                   <Switch 
-                    checked={theme === 'dark'} 
-                    onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')} 
+                  <Switch
+                    checked={theme === 'dark'}
+                    onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
                   />
                 )}
               </div>

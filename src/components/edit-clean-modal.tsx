@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CheckIn } from '@/lib/data-service';
-import { Car, Calendar, MapPin, User, Camera, RotateCw, Wand2, Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Car, Calendar, MapPin, User, Camera, RotateCw, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
@@ -61,7 +61,6 @@ export function EditCleanModal({
   const [isSaving, setIsSaving] = useState(false);
   const [isDetecting, setIsDetecting] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-  const [didAutoFix, setDidAutoFix] = useState(false);
   const [navDirection, setNavDirection] = useState<'next' | 'prev' | null>(null);
 
   // Reset form when clean changes
@@ -84,89 +83,18 @@ export function EditCleanModal({
 
       setFormData(newFormData);
       setHasChanges(false);
-      setDidAutoFix(false);
       setNavDirection(null);
     }
   }, [clean]);
 
-  // Car details extraction helpers
-  const parseCarDetails = (text: string): Partial<CheckIn> => {
-    const details: Partial<CheckIn> = {};
-    const normalizedText = text.toUpperCase();
-
-    // Known car makes
-    const makes = ['TOYOTA', 'HONDA', 'FORD', 'CHEVROLET', 'NISSAN', 'HYUNDAI', 'KIA', 'MAZDA', 'SUBARU', 'VOLKSWAGEN', 'BMW', 'MERCEDES', 'LEXUS', 'JEEP', 'DODGE', 'RAM', 'GMC', 'CADILLAC', 'LINCOLN', 'AUDI', 'TESLA', 'ACURA', 'INFINITI', 'MITSUBISHI', 'VOLVO', 'PORSCHE', 'JAGUAR', 'LAND ROVER', 'MINI', 'BUICK'];
-    
-    // Known models (common ones)
-    const models = ['CAMRY', 'COROLLA', 'RAV4', 'HIGHLANDER', 'SILVERADO', 'F-150', 'CIVIC', 'ACCORD', 'CR-V', 'ODYSSEY', 'ALTIMA', 'SONIC', 'FORTE', 'SOUL', 'MAZDA3', 'CX-5', 'OUTBACK', 'FORESTER', 'IMPREZA', 'JETTA', 'PASSAT', '3 SERIES', '5 SERIES', 'C-CLASS', 'E-CLASS', 'GLC', 'RX', 'ES', 'GRAND CHEROKEE', 'WRANGLER', 'CHALLENGER', 'CHARGER', '1500', '2500', 'SIERRA', 'YUKON', 'ESCALADE', ' Navigator', 'A4', 'A6', 'Q5', 'MODEL 3', 'MODEL Y', 'MDX', 'RDX', 'OUTLANDER', 'XC90', '911', 'CAYENNE', 'MACAN'];
-
-    // Insurance companies
-    const insurances = ['ERIE INSURANCE', 'STATE FARM', 'GEICO', 'PROGRESSIVE', 'ALLSTATE', 'USAA', 'FARMERS', 'LIBERTY MUTUAL', 'NATIONWIDE', 'AIG', 'METLIFE', 'PRUDENTIAL', 'CHUBB', 'THE HARTFORD', 'AARP', 'BLUE CROSS', 'BLUE SHIELD'];
-
-    // Extract Make
-    for (const make of makes) {
-      if (normalizedText.includes(make)) {
-        details.make = make;
-        break;
-      }
-    }
-
-    // Extract Model (if make found, look near it)
-    if (details.make) {
-      const makeIndex = normalizedText.indexOf(details.make);
-      for (const model of models) {
-        const modelIndex = normalizedText.indexOf(model);
-        if (modelIndex !== -1 && Math.abs(modelIndex - makeIndex) < 200) {
-          details.model = model;
-          break;
-        }
-      }
-    }
-
-    // Extract Year (4 digits between 1990-2030)
-    const yearMatch = normalizedText.match(/\b(20[0-3][0-9]|199[0-9])\b/);
-    if (yearMatch) {
-      details.year = yearMatch[1];
-    }
-
-    // Extract Insurance
-    for (const ins of insurances) {
-      if (normalizedText.includes(ins)) {
-        details.insurance = ins;
-        break;
-      }
-    }
-
-    // Extract Stock # (look for STOCK followed by number)
-    const stockMatch = normalizedText.match(/STOCK[#]?\s*([A-Z0-9-]+)/i);
-    if (stockMatch) {
-      details.stock = stockMatch[1];
-    }
-
-    // Extract VIN (17 alphanumeric characters, typical VIN format)
-    const vinMatch = normalizedText.match(/\b([A-HJ-NP-Z0-9]{17})\b/i);
-    if (vinMatch) {
-      details.vin = vinMatch[1];
-    }
-
-    console.log('Parsed car details:', details);
-    return details;
-  };
-
-  // Dedicated Auto-Fix Trigger
   useEffect(() => {
-    console.log('Smart Fix trigger check:', { isOpen, picture: formData.picture, didAutoFix, isDetecting });
-    
-    if (isOpen && formData.picture && formData.picture !== 'N/A' && !didAutoFix && !isDetecting) {
-      console.log('Auto-triggering Smart Fix...');
-      // Small Delay before auto-triggering
+    if (isOpen && formData.picture && formData.picture !== 'N/A') {
       const timer = setTimeout(() => {
-        setDidAutoFix(true);
         handleSmartFix();
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [isOpen, formData.picture, didAutoFix, isDetecting]);
+  }, [isOpen]);
 
   const handleInputChange = (field: keyof CheckIn, value: any) => {
     setFormData(prev => ({
@@ -186,7 +114,6 @@ export function EditCleanModal({
 
     setIsDetecting(true);
     try {
-      // Load Tesseract if not present
       if (!window.Tesseract) {
         await new Promise((resolve, reject) => {
           const script = document.createElement('script');
@@ -205,22 +132,15 @@ export function EditCleanModal({
       });
 
       const worker = await window.Tesseract.createWorker('eng');
-
-      // We will try 4 rotations and check which one contains numbers (Stock #)
-      // Since we already have the stock #, we can check for it specifically!
       const targetStock = formData.stock?.trim();
       let bestRotation = formData.rotation || 0;
       let highestScore = -1;
 
-      // Create a canvas once
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d')!;
 
-      // We test ALL 4 rotations and score them
       for (const rot of [0, 90, 180, 270]) {
         const isLandscape = rot === 90 || rot === 270;
-
-        // Swap dimensions for 90/270
         if (isLandscape) {
           canvas.width = img.height;
           canvas.height = img.width;
@@ -236,47 +156,26 @@ export function EditCleanModal({
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
         ctx.restore();
 
-        // Run OCR with a slight quality boost
-        // Run OCR with word-level data for coordinate analysis
         const { data } = await worker.recognize(canvas.toDataURL('image/jpeg', 0.95));
         const { text, confidence, words } = data;
 
         const cleanText = text.replace(/[^a-zA-Z0-9]/g, '');
         const cleanStock = (targetStock || '').replace(/[^a-zA-Z0-9]/g, '').trim();
 
-        // --- ADVANCED SCORING SYSTEM ---
         let currentScore = confidence;
+        if (rot === 0) currentScore += 1500;
 
-        // HOME ROTATION BONUS: Overwhelming preference for the original photo
-        // Humans usually take photos the right way up. Don't touch it unless it's hopeless.
-        if (rot === 0) {
-          currentScore += 1500;
-        }
-
-        // 1. Precise Stock # Match & Position Analysis
         if (cleanStock && cleanStock.length >= 6) {
           const stockWord = words.find((w: any) => 
             w.text.replace(/[^0-9]/g, '').includes(cleanStock) || 
             cleanStock.includes(w.text.replace(/[^0-9]/g, ''))
           );
-
           if (stockWord) {
-            // Found the stock #! Base bonus
             currentScore += 500;
-
-            // BONUS: Moderate Confidence match?
             if (stockWord.confidence > 60) currentScore += 500;
-
-            // BONUS: Is the Stock # at the TOP of the image? (User Rule: "Stock should be on top")
             const relativeY = stockWord.bbox.y0 / canvas.height;
-            if (relativeY < 0.45) {
-              currentScore += 1000 * (1 - relativeY);
-            }
-
-            // SHORT-CIRCUIT: If rotation 0 finds the stock # even reasonably well, STOP.
-            // We trust the human's original orientation more than the AI's desire to "read" better sideways.
+            if (relativeY < 0.45) currentScore += 1000 * (1 - relativeY);
             if (rot === 0 && stockWord.confidence > 60) {
-              console.log("Short-circuit: 0° is good enough. Staying at home.");
               bestRotation = 0;
               highestScore = currentScore + 99999;
               break;
@@ -286,16 +185,9 @@ export function EditCleanModal({
           }
         }
 
-        // 2. Orientation Heuristics
-        // Bonus: Horizontal (Landscape) is MUCH better than Vertical (Portrait) for these photos
         if (canvas.width > canvas.height) currentScore += 1500;
-;
-
-        // 3. Digit Density (favors rotations where numbers are readable)
         const digitMatch = cleanText.match(/\d{6,}/);
         if (digitMatch) currentScore += (digitMatch[0].length * 10);
-
-        console.log(`Rotation ${rot}° | Score: ${currentScore} | Text: ${cleanText.substring(0, 20)}...`);
 
         if (currentScore > highestScore) {
           highestScore = currentScore;
@@ -303,122 +195,15 @@ export function EditCleanModal({
         }
       }
 
-      // INSTANT OFF: Turn off the scanner as soon as we have the result
       setIsDetecting(false);
-
-      // Terminate worker without waiting
       worker.terminate().catch((e: any) => console.log('Worker terminate error:', e));
-      
-      console.log('Smart Fix selected: ' + bestRotation + ' degrees');
-      console.log('formData.rotation:', formData.rotation);
-      console.log('Continuing to car details extraction...');
-      alert('Smart Fix done! Click OK to continue...');
 
-      try {
-        // Only mark changes if the rotation actually CHANGED
-        if (bestRotation !== formData.rotation) {
-          console.log('Rotation changed, updating...');
-          handleInputChange('rotation', bestRotation);
-        } else {
-          console.log('Rotation same, skipping update');
-        }
-      } catch (e) {
-        console.log('Rotation update error:', e);
+      if (bestRotation !== formData.rotation) {
+        handleInputChange('rotation', bestRotation);
       }
-
-      console.log('Creating canvas for car details...');
-      // Now extract car details from the best rotated image
-      // Re-run OCR on the best rotated version to get car details
-      console.log('Starting car details extraction...');
-      console.log('Image dimensions:', img.width, img.height);
-      console.log('bestRotation:', bestRotation);
-      
-      const canvas2 = document.createElement('canvas');
-      const ctx2 = canvas2.getContext('2d')!;
-      const isLandscape = bestRotation === 90 || bestRotation === 270;
-      
-      if (isLandscape) {
-        canvas2.width = img.height;
-        canvas2.height = img.width;
-      } else {
-        canvas2.width = img.width;
-        canvas2.height = img.height;
-      }
-      
-      ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
-      ctx2.save();
-      ctx2.translate(canvas2.width / 2, canvas2.height / 2);
-      ctx2.rotate((bestRotation * Math.PI) / 180);
-      ctx2.drawImage(img, -img.width / 2, -img.height / 2);
-      ctx2.restore();
-
-      // Create a fresh worker for text extraction
-      const worker2 = await window.Tesseract.createWorker('eng');
-      console.log('Worker2 created, running OCR...');
-      const { data } = await worker2.recognize(canvas2.toDataURL('image/jpeg', 0.9));
-      await worker2.terminate();
-
-      const extractedText = data.text;
-      console.log('Extracted OCR text length:', extractedText.length);
-      console.log('Extracted OCR text:', extractedText.substring(0, 500));
-      console.log('OCR confidence:', data.confidence);
-
-      // Parse car details from the extracted text
-      const parsedDetails = parseCarDetails(extractedText);
-      console.log('Current formData before update:', formData);
-      console.log('Parsed details from OCR:', parsedDetails);
-      
-      // Auto-fill fields that are currently "N/A" or empty
-      const updates: Partial<CheckIn> = {};
-      
-      const isMakeNA = !formData.make || formData.make === 'N/A' || formData.make === '';
-      const isModelNA = !formData.model || formData.model === 'N/A' || formData.model === '';
-      const isYearNA = !formData.year || formData.year === 'N/A' || formData.year === '';
-      const isInsuranceNA = !formData.insurance || formData.insurance === 'N/A' || formData.insurance === '';
-      const isStockNA = !formData.stock || formData.stock === 'N/A' || formData.stock === '';
-      const isVinNA = !formData.vin || formData.vin === 'N/A' || formData.vin === '';
-      
-      console.log('Field checks - make:', isMakeNA, 'model:', isModelNA, 'year:', isYearNA, 'insurance:', isInsuranceNA, 'stock:', isStockNA, 'vin:', isVinNA);
-      
-      if (isMakeNA && parsedDetails.make) {
-        updates.make = parsedDetails.make;
-        console.log('Auto-filling make:', parsedDetails.make);
-      }
-      if (isModelNA && parsedDetails.model) {
-        updates.model = parsedDetails.model;
-        console.log('Auto-filling model:', parsedDetails.model);
-      }
-      if (isYearNA && parsedDetails.year) {
-        updates.year = parsedDetails.year;
-        console.log('Auto-filling year:', parsedDetails.year);
-      }
-      if (isInsuranceNA && parsedDetails.insurance) {
-        updates.insurance = parsedDetails.insurance;
-        console.log('Auto-filling insurance:', parsedDetails.insurance);
-      }
-      if (isStockNA && parsedDetails.stock) {
-        updates.stock = parsedDetails.stock;
-        console.log('Auto-filling stock:', parsedDetails.stock);
-      }
-      if (isVinNA && parsedDetails.vin) {
-        updates.vin = parsedDetails.vin;
-        console.log('Auto-filling vin:', parsedDetails.vin);
-      }
-
-      // Apply updates if any
-      if (Object.keys(updates).length > 0) {
-        setFormData(prev => ({ ...prev, ...updates }));
-        setHasChanges(true);
-        
-        // Show notification
-        const filledFields = Object.keys(updates).join(', ').toUpperCase();
-        console.log(`Auto-filled: ${filledFields}`);
-      }
-
     } catch (error) {
       console.error('Error during Smart Fix:', error);
       setIsDetecting(false);
-      alert('Failed to auto-detect orientation. Please rotate manually.');
     }
   };
 
@@ -592,26 +377,10 @@ export function EditCleanModal({
                       <RotateCw className="w-3.5 h-3.5" />
                       Rotate
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleSmartFix}
-                      disabled={isDetecting}
-                      className="h-7 px-2 border-gray-200 dark:border-[#404040] text-xs gap-1 bg-blue-50/50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/20"
-                      title="Auto-Detect Orientation (AI)"
-                    >
-                      {isDetecting ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Wand2 className="w-3.5 h-3.5" />
-                      )}
-                      Magic Fix
-                    </Button>
                   </div>
                 </div>
 
                 <div className="relative w-[600px] h-[400px] flex items-center justify-center bg-gray-50 dark:bg-[#1a1a1a] rounded overflow-hidden border border-gray-100 dark:border-[#262626]">
-                  {/* Subtle AI Scanner Line - Synchronized with isDetecting */}
                   {isDetecting && (
                     <motion.div
                       initial={{ top: '0%' }}
