@@ -151,7 +151,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <span className="text-lg font-semibold text-gray-900 dark:text-[#fafafa]">
-                Admin Dashboard {activeSection === 'daily-cleans' && '- Daily Cleans'}
+                {menuItems.find(item => item.id === activeSection)?.label 
+                  ? `Admin Dashboard - ${menuItems.find(item => item.id === activeSection)?.label}`
+                  : 'Admin Dashboard'
+                }
               </span>
             </div>
             <div className="flex items-center space-x-4">
