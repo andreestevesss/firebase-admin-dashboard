@@ -615,17 +615,12 @@ export class DataService {
           console.log('First field value:', firstFieldValue);
           
           if (firstFieldKey && firstFieldValue) {
-            // Dynamic reading: field key = branch number, field value = location
-            branchName = firstFieldKey;
+            // Priority: name should be the readable label (e.g. "Dayton")
+            // The number from the key is moved to location/ID metadata
+            branchName = (firstFieldKey === '4' || firstFieldValue === 'Buckhannon') ? 'Buckhannon' : firstFieldValue;
+            branchLocation = firstFieldKey;
             
-            // Special case for branch 4 to show Buckhannon
-            if (firstFieldKey === '4') {
-              branchLocation = 'Buckhannon';
-            } else {
-              branchLocation = firstFieldValue;
-            }
-            
-            console.log('Found branch data:', { number: branchName, location: branchLocation });
+            console.log('Found branch data:', { name: branchName, number: branchLocation });
           } else {
             // Fallback: try standard field names
             console.log('Trying standard field names...');

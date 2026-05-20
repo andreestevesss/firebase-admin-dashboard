@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { User, DataService } from '@/lib/data-service';
 import { doc, updateDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { db, auth } from '@/lib/firebase';
 import { Loader2 } from 'lucide-react';
 
 interface UserModalProps {
@@ -28,6 +29,8 @@ export function UserModal({ user, isOpen, onClose, onSave, mode }: UserModalProp
     branch: ''
   });
   const [loading, setLoading] = useState(false);
+  const [resettingPassword, setResettingPassword] = useState(false);
+  const [resetMessage, setResetMessage] = useState('');
   const [branches, setBranches] = useState<string[]>([]);
 
   useEffect(() => {
@@ -65,6 +68,7 @@ export function UserModal({ user, isOpen, onClose, onSave, mode }: UserModalProp
           branch: ''
         });
       }
+      setResetMessage('');
     }
   }, [isOpen, user, mode]);
 
@@ -106,6 +110,20 @@ export function UserModal({ user, isOpen, onClose, onSave, mode }: UserModalProp
       console.error('Error saving user:', error);
     } finally {
       setLoading(false);
+  };
+
+  const handlePasswordReset = async () => {
+    if (!formData.email) return;
+    setResettingPassword(true);
+    setResetMessage('');
+    try {
+      await sendPasswordResetEmail(auth, formData.email);
+      setResetMessage('Password reset email sent successfully.');
+    } catch (error: any) {
+      console.error('Error sending password reset email:', error);
+      setResetMessage(error.message || 'Failed to send reset email.');
+    } finally {
+      setResettingPassword(false);
     }
   };
 
@@ -137,9 +155,28 @@ export function UserModal({ user, isOpen, onClose, onSave, mode }: UserModalProp
                 type="email"
                 value={formData.email || ''}
                 onChange={(e) => handleChange('email', e.target.value)}
-                placeholder="Enter email address"
                 required
               />
+              {mode === 'edit' && (
+                <div className="flex flex-col gap-2 mt-1">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handlePasswordReset}
+                    disabled={resettingPassword || !formData.email}
+                    className="w-fit"
+                  >
+                    {resettingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Send Password Reset Email
+                  </Button>
+                  {resetMessage && (
+                    <span className={`text-xs ${resetMessage.includes('sent') ? 'text-green-500' : 'text-red-500'}`}>
+                      {resetMessage}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="role">Role</Label>
