@@ -110,6 +110,7 @@ export function UserModal({ user, isOpen, onClose, onSave, mode }: UserModalProp
       console.error('Error saving user:', error);
     } finally {
       setLoading(false);
+    }
   };
 
   const handlePasswordReset = async () => {
