@@ -12,8 +12,10 @@ import {
   Eye,
   Database,
   Filter,
+  FileSpreadsheet,
   LayoutDashboard,
-  AlertCircle
+  AlertCircle,
+  Search as SearchIcon
 } from 'lucide-react';
 import {
   Select,
@@ -168,15 +170,25 @@ export default function SearchPage() {
                         <span className="text-xs text-gray-500 dark:text-[#737373] font-medium">{item.timestamp?.toLocaleDateString()}</span>
                       </TableCell>
                       <TableCell className="py-2 px-3 text-right">
-                        <div className="flex items-center justify-end">
+                        <div className="flex items-center justify-end space-x-1">
                           <Button
                             variant="ghost"
                             size="sm"
                             className="h-7 w-7 p-0 hover:bg-gray-100 dark:hover:bg-[#404040]"
                             onClick={() => handleEdit(item, type)}
+                            title="Edit"
                           >
                             <Edit size={14} />
                           </Button>
+                          <a
+                            href={`https://www.iaai.com/Search?Keyword=${item.stock}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-gray-100 hover:text-accent-foreground dark:hover:bg-[#404040] h-7 w-7"
+                            title="Search on IAAI"
+                          >
+                            <SearchIcon size={14} />
+                          </a>
                         </div>
                       </TableCell>
                     </TableRow>

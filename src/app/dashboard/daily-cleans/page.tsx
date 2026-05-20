@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/animated-table-rows';
 import { Badge } from '@/components/ui/badge';
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, Eye, Edit, Car, Calendar, MapPin, RefreshCw, Activity } from "lucide-react";
+import { Trash2, Eye, Edit, Car, Calendar, MapPin, RefreshCw, Activity, Search } from "lucide-react";
 import { DataService, CheckIn, Branch, User } from '@/lib/data-service';
 import { EditCleanModal } from '@/components/edit-clean-modal';
 import { DashboardLayout } from '@/components/dashboard-layout';
@@ -353,9 +353,19 @@ function DailyCleansContent() {
                                 size="sm"
                                 onClick={() => handleEditClean(clean)}
                                 className="h-6 w-6 p-0 hover:bg-gray-100 dark:hover:bg-[#404040]"
+                                title="Edit"
                               >
                                 <Edit className="h-3 w-3" />
                               </Button>
+                              <a
+                                href={`https://www.iaai.com/Search?Keyword=${clean.stock}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-gray-100 hover:text-accent-foreground dark:hover:bg-[#404040] h-6 w-6"
+                                title="Search on IAAI"
+                              >
+                                <Search className="h-3 w-3" />
+                              </a>
                             </div>
                           </TableCell>
                         </motion.tr>

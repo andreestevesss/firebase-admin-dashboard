@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { DataService, SalesPrep, Branch, User } from '@/lib/data-service';
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, Eye, Edit, Car } from "lucide-react";
+import { Trash2, Eye, Edit, Car, Search } from "lucide-react";
 import { EditCleanModal } from '@/components/edit-clean-modal';
 import SlidingPagination from '@/components/ui/sliding-pagination';
 
@@ -340,15 +340,25 @@ function SalesPrepContent() {
                             <span className="text-xs text-gray-700 dark:text-[#a1a1a1]">{sale.timestamp ? sale.timestamp.toLocaleDateString() : 'N/A'}</span>
                           </TableCell>
                           <TableCell className="py-1 px-3 text-right">
-                            <div className="flex items-center justify-end">
+                            <div className="flex items-center justify-end space-x-1">
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 className="h-6 w-6 p-0 hover:bg-gray-100 dark:hover:bg-[#404040]"
                                 onClick={() => handleEditSale(sale)}
+                                title="Edit"
                               >
                                 <Edit className="h-3.5 w-3.5 text-gray-400" />
                               </Button>
+                              <a
+                                href={`https://www.iaai.com/Search?Keyword=${sale.stock}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-gray-100 hover:text-accent-foreground dark:hover:bg-[#404040] h-6 w-6"
+                                title="Search on IAAI"
+                              >
+                                <Search className="h-3.5 w-3.5 text-gray-400" />
+                              </a>
                             </div>
                           </TableCell>
                         </motion.tr>
