@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CheckIn } from '@/lib/data-service';
-import { Car, Calendar, MapPin, User, Camera, RotateCw, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
+import { Car, Calendar, MapPin, User, Camera, RotateCw, ArrowLeft, ArrowRight, Loader2, Search } from 'lucide-react';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
@@ -420,7 +420,21 @@ export function EditCleanModal({
                 <div className="space-y-3 w-[280px]">
                   {/* STOCK */}
                   <div className="space-y-1">
-                    <Label htmlFor="stock" className="text-xs font-medium text-gray-700 dark:text-[#a1a1a1]">Stock #</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="stock" className="text-xs font-medium text-gray-700 dark:text-[#a1a1a1]">Stock #</Label>
+                      {formData.stock && (
+                        <a
+                          href={`https://www.iaai.com/Search?Keyword=${formData.stock}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center text-[10px] font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                          title="Search on IAAI"
+                        >
+                          <Search className="w-3 h-3 mr-1" />
+                          Search IAAI
+                        </a>
+                      )}
+                    </div>
                     <Input
                       id="stock"
                       value={formData.stock}
